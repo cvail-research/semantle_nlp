@@ -1,8 +1,10 @@
 import os
 import random
+import math
 import torch
 import torch.nn.functional as F
 import flet as ft
+import flet_charts as fc
 from huggingface_hub import hf_hub_download
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -30,12 +32,30 @@ vector_secreto = None
 ranking_dict = {}
 orden_palabras_ranking = []
 
+# Rango de frecuencia donde suelen concentrarse sustantivos/verbos/adjetivos
+# comunes en español, evitando stopwords (muy al inicio) y nombres raros/
+# extranjeros (que empiezan a colarse después de cierto punto).
+RANGO_MIN_SECRETA = 300
+RANGO_MAX_SECRETA = 8000
+LONGITUD_MIN_SECRETA = 4
+
+def _es_candidata_valida(palabra):
+    return (
+        palabra.isalpha()
+        and len(palabra) >= LONGITUD_MIN_SECRETA
+        and palabra.islower()
+    )
+
 def actualizar_palabra_secreta(nueva_palabra=None):
     global PALABRA_SECRETA, vector_secreto, ranking_dict, orden_palabras_ranking
     if nueva_palabra and nueva_palabra in dict_vocab:
         PALABRA_SECRETA = nueva_palabra
     else:
-        PALABRA_SECRETA = random.choice(palabras[:50000])
+        pool = [
+            p for p in palabras[RANGO_MIN_SECRETA:RANGO_MAX_SECRETA]
+            if _es_candidata_valida(p)
+        ]
+        PALABRA_SECRETA = random.choice(pool)
 
     idx_secreta = dict_vocab[PALABRA_SECRETA]
     vector_secreto = tensor_vectores[idx_secreta]
@@ -48,35 +68,51 @@ def actualizar_palabra_secreta(nueva_palabra=None):
 
 actualizar_palabra_secreta(PALABRA_SECRETA)
 
+# Colores en hex: evitan depender de nombres de enum que Flet sigue renombrando
+COLOR_GREEN_ACCENT = "#00E676"
+COLOR_GREEN = "#66BB6A"
+COLOR_LIME = "#D4E157"
+COLOR_AMBER = "#FFCA28"
+COLOR_ORANGE = "#FFA726"
+COLOR_RED = "#EF5350"
+COLOR_CYAN = "#00BCD4"
+COLOR_CYAN_200 = "#80DEEA"
+COLOR_CYAN_400 = "#26C6DA"
+COLOR_AMBER_300 = "#FFD54F"
+COLOR_GREY_400 = "#BDBDBD"
+COLOR_GREY_500 = "#9E9E9E"
+COLOR_GREY_800 = "#424242"
+COLOR_SURFACE_VARIANT = "#1E2530"
+
 def obtener_color_temperatura(puesto):
     if puesto == 1:
-        return "greenAccent400"
+        return COLOR_GREEN_ACCENT
     elif puesto <= 100:
-        return "green400"
+        return COLOR_GREEN
     elif puesto <= 1000:
-        return "lime400"
+        return COLOR_LIME
     elif puesto <= 5000:
-        return "amber400"
+        return COLOR_AMBER
     elif puesto <= 20000:
-        return "orange400"
+        return COLOR_ORANGE
     else:
-        return "red400"
+        return COLOR_RED
 
 def main(page: ft.Page):
     page.title = f"Semantle Español ({device.type.upper()} FP16) 🎯"
-    page.window_width = 540
-    page.window_height = 850
+    page.window.width = 540
+    page.window.height = 900
     page.padding = 24
     page.theme_mode = ft.ThemeMode.DARK
-    page.theme = ft.Theme(color_scheme_seed="cyan")
+    page.theme = ft.Theme(color_scheme_seed=COLOR_CYAN)
 
     intentos = []
     contador = 0
     pistas_usadas = 0
 
     header = ft.Column([
-        ft.Text("Semantle Español 🎯", size=28, weight=ft.FontWeight.BOLD, color="cyan200"),
-        ft.Text(f"Motor: PyTorch FP16 Tensor Matrix en {device.type.upper()} | Vocabulario: {TOTAL_PALABRAS:,}", size=11, color="grey500"),
+        ft.Text("Semantle Español 🎯", size=28, weight=ft.FontWeight.BOLD, color=COLOR_CYAN_200),
+        ft.Text(f"Motor: PyTorch FP16 Tensor Matrix en {device.type.upper()} | Vocabulario: {TOTAL_PALABRAS:,}", size=11, color=COLOR_GREY_500),
     ], spacing=2)
 
     input_palabra = ft.TextField(
@@ -89,16 +125,36 @@ def main(page: ft.Page):
 
     mensaje_estado = ft.Text("", size=13, weight=ft.FontWeight.W_500)
 
+    # Punto Meta fijo en el centro (0,0)
+    puntos_lista = [fc.ScatterChartSpot(x=0, y=0, color=COLOR_CYAN, radius=8)]
+
+    grafico_cercania = fc.ScatterChart(
+        spots=puntos_lista,
+        min_x=-1.0, max_x=1.0,
+        min_y=-1.0, max_y=1.0,
+        expand=True
+    )
+
+    contenedor_grafico = ft.Container(
+        content=ft.Column([
+            ft.Text("🎯 Mapa de Proximidad (Centro Cyan = Meta)", size=12, color=COLOR_GREY_400),
+            ft.Container(content=grafico_cercania, height=220)
+        ]),
+        padding=12,
+        border_radius=12,
+        bgcolor=COLOR_SURFACE_VARIANT
+    )
+
     resultado_destacado = ft.Container(
         content=ft.Column([
-            ft.Text("Último intento", size=12, color="grey400"),
+            ft.Text("Último intento", size=12, color=COLOR_GREY_400),
             ft.Text("Esperando primera palabra...", size=18, weight=ft.FontWeight.BOLD),
-            ft.ProgressBar(value=0, color="cyan", bgcolor="grey800", height=8),
+            ft.ProgressBar(value=0, color=COLOR_CYAN, bgcolor=COLOR_GREY_800, height=8),
             ft.Text("", size=12)
         ], spacing=6),
         padding=16,
         border_radius=12,
-        bgcolor="surfaceVariant",
+        bgcolor=COLOR_SURFACE_VARIANT,
         visible=False
     )
 
@@ -118,6 +174,10 @@ def main(page: ft.Page):
         contador = 0
         pistas_usadas = 0
         intentos.clear()
+        
+        puntos_lista.clear()
+        puntos_lista.append(fc.ScatterChartSpot(x=0, y=0, color=COLOR_CYAN, radius=8))
+        
         tabla_intentos.rows = []
         resultado_destacado.visible = False
         mensaje_estado.value = ""
@@ -127,7 +187,7 @@ def main(page: ft.Page):
         if nueva_palabra:
             actualizar_palabra_secreta()
             mensaje_estado.value = "🔄 ¡Nueva palabra secreta seleccionada!"
-            mensaje_estado.color = "cyan400"
+            mensaje_estado.color = COLOR_CYAN_400
         
         page.update()
 
@@ -152,7 +212,7 @@ def main(page: ft.Page):
         else:
             mensaje_estado.value = "⚠️ No hay más pistas disponibles para esta partida."
             
-        mensaje_estado.color = "amber300"
+        mensaje_estado.color = COLOR_AMBER_300
         page.update()
 
     def evaluar_palabra(e):
@@ -163,7 +223,7 @@ def main(page: ft.Page):
 
         if palabra_user not in dict_vocab:
             mensaje_estado.value = f"⚠️ '{palabra_user}' no está en el vocabulario."
-            mensaje_estado.color = "orange400"
+            mensaje_estado.color = COLOR_ORANGE
             page.update()
             return
 
@@ -177,6 +237,23 @@ def main(page: ft.Page):
         es_correcta = (palabra_user == PALABRA_SECRETA)
         color_puesto = obtener_color_temperatura(puesto)
 
+        # Distancia respecto al centro (1.0 - Cosine Similarity)
+        distancia = max(0.0, 1.0 - max(0.0, similitud))
+        angulo = random.uniform(0, 2 * math.pi)
+        
+        pos_x = distancia * math.cos(angulo) if not es_correcta else 0.0
+        pos_y = distancia * math.sin(angulo) if not es_correcta else 0.0
+
+        puntos_lista.append(
+            fc.ScatterChartSpot(
+                x=pos_x, 
+                y=pos_y, 
+                color=color_puesto, 
+                radius=5
+            )
+        )
+        grafico_cercania.spots = puntos_lista
+
         porcentaje_cercania = max(0.0, 1.0 - (puesto / TOTAL_PALABRAS))
         resultado_destacado.visible = True
         
@@ -185,7 +262,7 @@ def main(page: ft.Page):
         col_content[1].color = color_puesto
         col_content[2].value = 1.0 if es_correcta else porcentaje_cercania
         col_content[2].color = color_puesto
-        col_content[3].value = f"Puesto {puesto:,} de {TOTAL_PALABRAS:,} (Similitud: {similitud:.4f})"
+        col_content[3].value = f"Puesto {puesto:,} de {TOTAL_PALABRAS:,} (Similitud Coseno: {similitud:.4f})"
 
         intentos.append({
             "num": contador,
@@ -210,7 +287,11 @@ def main(page: ft.Page):
 
         if es_correcta:
             mensaje_estado.value = f"🎉 ¡Correcto! La palabra era '{PALABRA_SECRETA}' en {contador} intentos."
-            mensaje_estado.color = "green400"
+            mensaje_estado.color = COLOR_GREEN
+            input_palabra.disabled = True
+        elif contador >= 5:
+            mensaje_estado.value = f"❌ Se acabaron tus intentos. La palabra era '{PALABRA_SECRETA}'."
+            mensaje_estado.color = COLOR_RED
             input_palabra.disabled = True
         else:
             mensaje_estado.value = ""
@@ -220,8 +301,8 @@ def main(page: ft.Page):
 
     btn_probar = ft.ElevatedButton("Probar", on_click=evaluar_palabra)
     btn_pista = ft.OutlinedButton("Pista 💡", on_click=dar_pista_semantica)
-    btn_reiniciar = ft.OutlinedButton("Reiniciar", icon="refresh", on_click=lambda e: reiniciar_interfaz(nueva_palabra=False))
-    btn_nueva = ft.ElevatedButton("Nueva Palabra 🎲", icon="casino", on_click=lambda e: reiniciar_interfaz(nueva_palabra=True))
+    btn_reiniciar = ft.OutlinedButton("Reiniciar", icon=ft.Icons.REFRESH, on_click=lambda e: reiniciar_interfaz(nueva_palabra=False))
+    btn_nueva = ft.ElevatedButton("Nueva Palabra 🎲", icon=ft.Icons.CASINO, on_click=lambda e: reiniciar_interfaz(nueva_palabra=True))
 
     page.add(
         header,
@@ -230,9 +311,10 @@ def main(page: ft.Page):
         ft.Row([btn_pista, btn_nueva, btn_reiniciar], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
         mensaje_estado,
         resultado_destacado,
+        contenedor_grafico,
         ft.Divider(height=10),
-        ft.Text("Historial de intentos (ordenado por cercanía):", size=12, color="grey400"),
+        ft.Text("Historial de intentos (ordenado por cercanía):", size=12, color=COLOR_GREY_400),
         ft.Column([tabla_intentos], scroll=ft.ScrollMode.AUTO, expand=True)
     )
 
-ft.app(target=main)
+ft.run(main)

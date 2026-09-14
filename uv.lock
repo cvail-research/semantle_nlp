@@ -319,6 +319,18 @@ wheels = [
 ]
 
 [[package]]
+name = "flet-charts"
+version = "0.86.5"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "flet" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/12/1f/b65bdcab0220434884e9f4aed8393ff719736fcc8c5d16217f4764f14b3e/flet_charts-0.86.5.tar.gz", hash = "sha256:d5bde938d423675a92c6310fb122249226605752a62146f1d4355271707b40d9", size = 53198, upload-time = "2026-08-01T16:51:56.754Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d1/e1/1030e460ae4944c03a206a1c0d6c1b31210a53cb12764a7e054cc0f01593/flet_charts-0.86.5-py3-none-any.whl", hash = "sha256:af3d1f0515607193a4a2880f9d2ed2210a8a064b6326707f6c1b04b202c2396a", size = 74190, upload-time = "2026-08-01T16:51:55.611Z" },
+]
+
+[[package]]
 name = "fsspec"
 version = "2026.7.0"
 source = { registry = "https://pypi.org/simple" }
@@ -580,6 +592,7 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "flet" },
+    { name = "flet-charts" },
     { name = "huggingface-hub" },
     { name = "numpy" },
     { name = "spacy" },
@@ -589,6 +602,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "flet", specifier = ">=0.86.5" },
+    { name = "flet-charts", specifier = ">=0.86.5" },
     { name = "huggingface-hub", specifier = ">=1.31.0" },
     { name = "numpy", specifier = ">=2.5.3" },
     { name = "spacy", specifier = ">=3.8.16" },
