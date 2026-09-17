@@ -32,30 +32,36 @@ vector_secreto = None
 ranking_dict = {}
 orden_palabras_ranking = []
 
-# Rango de frecuencia donde suelen concentrarse sustantivos/verbos/adjetivos
-# comunes en español, evitando stopwords (muy al inicio) y nombres raros/
-# extranjeros (que empiezan a colarse después de cierto punto).
-RANGO_MIN_SECRETA = 300
-RANGO_MAX_SECRETA = 8000
-LONGITUD_MIN_SECRETA = 4
+# Diccionario curado de palabras jugables: concretas, cotidianas y con vecinos
+# semánticos claros. El vocabulario completo se sigue usando para evaluar los
+# intentos del jugador; esta lista solo define qué puede salir como secreta.
+PALABRAS_JUGABLES = [
+    "guitarra", "soldado", "cocina", "hospital", "bicicleta",
+    "invierno", "familia", "escuela", "pescado", "ventana",
+    "camino", "silencio", "tormenta", "mercado", "caballo",
+    "pintura", "medicina", "revista", "frontera", "naranja",
+    "playa", "castillo", "orquesta", "desierto", "zapato",
+    "cerebro", "bosque", "cerveza", "aeropuerto", "juguete",
+]
 
-def _es_candidata_valida(palabra):
-    return (
-        palabra.isalpha()
-        and len(palabra) >= LONGITUD_MIN_SECRETA
-        and palabra.islower()
-    )
+def _construir_pool_secretas():
+    pool = [p for p in PALABRAS_JUGABLES if p in dict_vocab]
+    if not pool:
+        raise ValueError(
+            "Ninguna palabra de PALABRAS_JUGABLES está en el vocabulario cargado."
+        )
+    return pool
+
+POOL_SECRETAS = _construir_pool_secretas()
 
 def actualizar_palabra_secreta(nueva_palabra=None):
     global PALABRA_SECRETA, vector_secreto, ranking_dict, orden_palabras_ranking
     if nueva_palabra and nueva_palabra in dict_vocab:
         PALABRA_SECRETA = nueva_palabra
     else:
-        pool = [
-            p for p in palabras[RANGO_MIN_SECRETA:RANGO_MAX_SECRETA]
-            if _es_candidata_valida(p)
-        ]
-        PALABRA_SECRETA = random.choice(pool)
+        # Evita repetir la palabra de la partida anterior si hay alternativas.
+        candidatas = [p for p in POOL_SECRETAS if p != PALABRA_SECRETA] or POOL_SECRETAS
+        PALABRA_SECRETA = random.choice(candidatas)
 
     idx_secreta = dict_vocab[PALABRA_SECRETA]
     vector_secreto = tensor_vectores[idx_secreta]
