@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+    <title>Jugador - Semantle</title>
+
+    <link
+        rel="stylesheet"
+        href="/static/style.css"
+    >
+</head>
+<body>
+    <main class="container">
+        <h1>Semantle Español</h1>
+
+        <section
+            id="join-panel"
+            class="card"
+        >
+            <h2>Unirse a una partida</h2>
+
+            <input
+                id="game-code-input"
+                type="text"
+                placeholder="Código de partida"
+                maxlength="6"
+            >
+
+            <input
+                id="player-name"
+                type="text"
+                placeholder="Tu nombre"
+                maxlength="30"
+            >
+
+            <button onclick="unirse()">
+                Unirse
+            </button>
+
+            <p
+                id="join-message"
+                class="message"
+            ></p>
+        </section>
+
+        <section
+            id="game-panel"
+            class="card hidden"
+        >
+            <h2>
+                Partida:
+                <span id="game-code">-</span>
+            </h2>
+
+            <p>
+                Jugador:
+                <strong id="player-display">-</strong>
+            </p>
+
+            <p>
+                Categoría:
+                <strong id="category-display">-</strong>
+            </p>
+
+            <p>
+                Estado:
+                <strong id="game-status">-</strong>
+            </p>
+
+            <p>
+                Jugadores:
+                <strong id="connected-players">
+                    0/10
+                </strong>
+            </p>
+
+            <p>
+                Tiempo:
+                <strong id="time-display">-</strong>
+            </p>
+
+            <p>
+                Intentos restantes:
+                <strong id="attempts-left">
+                    5
+                </strong>
+            </p>
+
+            <div
+                id="waiting-message"
+                class="message"
+            >
+                Esperando a que el administrador
+                inicie la partida.
+            </div>
+
+            <div
+                id="playing-controls"
+                class="hidden"
+            >
+                <div class="input-row">
+                    <input
+                        id="guess-input"
+                        type="text"
+                        placeholder="Escribe una palabra"
+                        onkeydown="if(event.key === 'Enter') enviarIntento()"
+                    >
+
+                    <button
+                        id="guess-button"
+                        onclick="enviarIntento()"
+                    >
+                        Probar
+                    </button>
+                </div>
+
+                <button
+                    id="hint-button"
+                    onclick="pedirPista()"
+                    class="secondary"
+                >
+                    Pedir pista
+                </button>
+
+                <p
+                    id="game-message"
+                    class="message"
+                ></p>
+
+                <h3>Mis intentos</h3>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Palabra</th>
+                            <th>Similitud</th>
+                            <th>Ranking</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="attempts-table"></tbody>
+                </table>
+            </div>
+
+            <div
+                id="podium-container"
+                class="podium"
+            ></div>
+        </section>
+    </main>
+
+    <script>
+        let playerId = localStorage.getItem(
+            "player_id"
+        );
+
+        function mostrarJuego() {
+            document
+                .getElementById("join-panel")
+                .classList.add("hidden");
+
+            document
+                .getElementById("game-panel")
+                .classList.remove("hidden");
+
+            cargarEstado();
+        }
+
+        function volverAUnirse(mensaje) {
+            localStorage.removeItem(
+                "player_id"
+            );
+
+            playerId = null;
+
+            document
+                .getElementById("game-panel")
+                .classList.add("hidden");
+
+            document
+                .getElementById("join-panel")
+                .classList.remove("hidden");
+
+            document
+                .getElementById("join-message")
+                .textContent =
+                mensaje ||
+                "Únete a una partida nueva.";
+        }
+
+        async function unirse() {
+            const codigo = document
+                .getElementById("game-code-input")
+                .value
+                .trim()
+                .toUpperCase();
+
+            const nombre = document
+                .getElementById("player-name")
+                .value
+                .trim();
+
+            if (!codigo || !nombre) {
+                document
+                    .getElementById("join-message")
+                    .textContent =
+                    "Escribe código y nombre.";
+
+                return;
+            }
+
+            const respuesta = await fetch(
+                "/api/partida/unirse",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+                    body: JSON.stringify({
+                        codigo: codigo,
+                        nombre: nombre
+                    })
+                }
+            );
+
+            const datos = await respuesta.json();
+
+            if (!respuesta.ok) {
+                document
+                    .getElementById("join-message")
+                    .textContent = datos.detail;
+
+                return;
+            }
+
+            playerId = datos.jugador_id;
+
+            localStorage.setItem(
+                "player_id",
+                playerId
+            );
+
+            document
+                .getElementById("game-code")
+                .textContent = datos.codigo;
+
+            document
+                .getElementById("player-display")
+                .textContent = datos.nombre;
+
+            mostrarJuego();
+        }
+
+        async function cargarEstado() {
+            if (!playerId) {
+                return;
+            }
+
+            try {
+                const respuesta = await fetch(
+                    "/api/partida/estado?jugador_id=" +
+                    encodeURIComponent(playerId)
+                );
+
+                const datos = await respuesta.json();
+
+                if (!respuesta.ok) {
+                    if (respuesta.status === 404) {
+                        volverAUnirse(
+                            "La partida anterior terminó. " +
+                            "Únete a la nueva partida."
+                        );
+                    } else {
+                        document
+                            .getElementById("game-message")
+                            .textContent =
+                            datos.detail;
+                    }
+
+                    return;
+                }
+
+                mostrarEstado(datos);
+            } catch (error) {
+                document
+                    .getElementById("game-message")
+                    .textContent =
+                    "No se pudo consultar la partida.";
+            }
+        }
+
+        function mostrarEstado(datos) {
+            document
+                .getElementById("game-code")
+                .textContent = datos.codigo;
+
+            document
+                .getElementById("player-display")
+                .textContent = datos.nombre;
+
+            document
+                .getElementById("category-display")
+                .textContent =
+                datos.categoria || "-";
+
+            document
+                .getElementById("game-status")
+                .textContent = datos.estado;
+
+            document
+                .getElementById("connected-players")
+                .textContent =
+                `${datos.jugadores_conectados}/` +
+                `${datos.max_jugadores}`;
+
+            document
+                .getElementById("attempts-left")
+                .textContent =
+                datos.intentos_restantes;
+
+            const timeDisplay = document
+                .getElementById("time-display");
+
+            const waitingMessage = document
+                .getElementById("waiting-message");
+
+            const controls = document
+                .getElementById("playing-controls");
+
+            const input = document
+                .getElementById("guess-input");
+
+            const guessButton = document
+                .getElementById("guess-button");
+
+            const hintButton = document
+                .getElementById("hint-button");
+
+            if (
+                datos.estado ===
+                "ESPERANDO_JUGADORES"
+            ) {
+                timeDisplay.textContent =
+                    "Esperando inicio";
+
+                waitingMessage.textContent =
+                    "Esperando a que el administrador " +
+                    "inicie la partida.";
+
+                waitingMessage.classList.remove(
+                    "hidden"
+                );
+
+                controls.classList.add(
+                    "hidden"
+                );
+
+                input.disabled = true;
+                guessButton.disabled = true;
+                hintButton.disabled = true;
+            } else if (
+                datos.estado === "INICIANDO"
+            ) {
+                timeDisplay.textContent =
+                    `Iniciando en ` +
+                    `${datos.cuenta_regresiva}...`;
+
+                waitingMessage.textContent =
+                    `La partida comienza en ` +
+                    `${datos.cuenta_regresiva}...`;
+
+                waitingMessage.classList.remove(
+                    "hidden"
+                );
+
+                controls.classList.add(
+                    "hidden"
+                );
+
+                input.disabled = true;
+                guessButton.disabled = true;
+                hintButton.disabled = true;
+            } else if (
+                datos.estado === "EN_CURSO" &&
+                !datos.gano &&
+                !datos.terminado
+            ) {
+                timeDisplay.textContent =
+                    `${datos.segundos_restantes} segundos`;
+
+                waitingMessage.classList.add(
+                    "hidden"
+                );
+
+                controls.classList.remove(
+                    "hidden"
+                );
+
+                input.disabled = false;
+                guessButton.disabled = false;
+                hintButton.disabled = false;
+            } else if (
+                datos.gano &&
+                datos.estado === "EN_CURSO"
+            ) {
+                timeDisplay.textContent =
+                    `${datos.segundos_restantes} segundos`;
+
+                waitingMessage.textContent =
+                    "¡Felicitaciones! Ganaste. " +
+                    "Espera a que el administrador " +
+                    "termine la partida.";
+
+                waitingMessage.classList.remove(
+                    "hidden"
+                );
+
+                controls.classList.remove(
+                    "hidden"
+                );
+
+                input.disabled = true;
+                guessButton.disabled = true;
+                hintButton.disabled = true;
+            } else if (
+                datos.estado === "FINALIZADA"
+            ) {
+                timeDisplay.textContent =
+                    "Finalizada";
+
+                waitingMessage.textContent =
+                    "La partida terminó. " +
+                    "Este es el podio final.";
+
+                waitingMessage.classList.remove(
+                    "hidden"
+                );
+
+                controls.classList.remove(
+                    "hidden"
+                );
+
+                input.disabled = true;
+                guessButton.disabled = true;
+                hintButton.disabled = true;
+
+                document
+                    .getElementById("game-message")
+                    .textContent =
+                    "La palabra era: " +
+                    datos.palabra_secreta;
+
+                if (datos.podio) {
+                    mostrarPodio(datos.podio);
+                }
+            } else {
+                timeDisplay.textContent =
+                    "Finalizado";
+
+                waitingMessage.textContent =
+                    "Ya terminaste tu participación. " +
+                    "Espera a que termine la partida.";
+
+                waitingMessage.classList.remove(
+                    "hidden"
+                );
+
+                controls.classList.remove(
+                    "hidden"
+                );
+
+                input.disabled = true;
+                guessButton.disabled = true;
+                hintButton.disabled = true;
+            }
+
+            if (datos.gano) {
+                document
+                    .getElementById("game-message")
+                    .textContent =
+                    "¡Felicitaciones! Ganaste. " +
+                    "Ahora espera a los demás jugadores.";
+            }
+
+            mostrarIntentos(datos.intentos);
+
+            // Nunca mostrar podio antes de FINALIZADA.
+            if (datos.estado !== "FINALIZADA") {
+                document
+                    .getElementById("podium-container")
+                    .innerHTML = "";
+            }
+        }
+
+        function mostrarIntentos(intentos) {
+            const tabla = document
+                .getElementById("attempts-table");
+
+            tabla.innerHTML = "";
+
+            for (const intento of intentos) {
+                const fila =
+                    document.createElement("tr");
+
+                fila.innerHTML = `
+                    <td>${intento.numero_intento}</td>
+                    <td style="color:${intento.color}">
+                        ${intento.palabra}
+                    </td>
+                    <td>${intento.similitud}</td>
+                    <td>#${intento.puesto}</td>
+                `;
+
+                tabla.appendChild(fila);
+            }
+        }
+
+        function mostrarPodio(podio) {
+            const contenedor = document
+                .getElementById("podium-container");
+
+            contenedor.innerHTML = `
+                <h2>🏆 Podio final</h2>
+                <ol>
+                    ${podio.map(jugador => `
+                        <li>
+                            <strong>
+                                ${jugador.nombre}
+                            </strong>
+                            -
+                            ${jugador.intentos}
+                            intento(s)
+                            ${
+                                jugador.gano
+                                    ? " ✅"
+                                    : " ❌"
+                            }
+                            ${
+                                jugador.tiempo_segundos !== null
+                                    ? " - " +
+                                      jugador.tiempo_segundos +
+                                      " segundos"
+                                    : ""
+                            }
+                        </li>
+                    `).join("")}
+                </ol>
+            `;
+        }
+
+        async function enviarIntento() {
+            const input = document
+                .getElementById("guess-input");
+
+            if (input.disabled) {
+                return;
+            }
+
+            const palabra = input.value.trim();
+
+            if (!palabra) {
+                return;
+            }
+
+            const respuesta = await fetch(
+                "/api/partida/intento",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+                    body: JSON.stringify({
+                        jugador_id: playerId,
+                        palabra: palabra
+                    })
+                }
+            );
+
+            const datos = await respuesta.json();
+
+            if (!respuesta.ok) {
+                document
+                    .getElementById("game-message")
+                    .textContent = datos.detail;
+
+                if (
+                    datos.detail.includes(
+                        "Ya ganaste"
+                    )
+                ) {
+                    input.disabled = true;
+
+                    document
+                        .getElementById("guess-button")
+                        .disabled = true;
+
+                    document
+                        .getElementById("hint-button")
+                        .disabled = true;
+                }
+
+                return;
+            }
+
+            input.value = "";
+
+            if (datos.es_correcta) {
+                document
+                    .getElementById("game-message")
+                    .textContent =
+                    "¡Felicitaciones! Ganaste. " +
+                    "Espera a los demás jugadores.";
+            } else {
+                document
+                    .getElementById("game-message")
+                    .textContent =
+                    `Tu palabra quedó en el ` +
+                    `puesto #${datos.puesto}.`;
+            }
+
+            cargarEstado();
+        }
+
+        async function pedirPista() {
+            const respuesta = await fetch(
+                "/api/partida/pista",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+                    body: JSON.stringify({
+                        jugador_id: playerId
+                    })
+                }
+            );
+
+            const datos = await respuesta.json();
+
+            document
+                .getElementById("game-message")
+                .textContent =
+                datos.pista || datos.detail;
+        }
+
+        if (playerId) {
+            mostrarJuego();
+        }
+
+        setInterval(() => {
+            if (playerId) {
+                cargarEstado();
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

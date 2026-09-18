@@ -1,19 +1,23 @@
 [project]
 name = "nlp-demo"
 version = "0.1.0"
-description = "Add your description here"
+description = "Juego Semantle en español para varios jugadores"
 readme = "README.md"
 authors = [
     { name = "mick2332-q", email = "ayalamigue908@gmail.com" }
 ]
 requires-python = ">=3.14"
+
 dependencies = [
+    "fastapi>=0.115.0",
     "flet>=0.86.5",
     "flet-charts>=0.86.5",
     "huggingface-hub>=1.31.0",
+    "jinja2>=3.1.0",
     "numpy>=2.5.3",
     "spacy>=3.8.16",
     "torch>=2.14.0",
+    "uvicorn[standard]>=0.30.0"
 ]
 
 [project.scripts]

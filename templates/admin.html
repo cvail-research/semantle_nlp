@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Administrador - Semantle</title>
+
+    <link
+        rel="stylesheet"
+        href="/static/style.css"
+    >
+</head>
+
+<body>
+    <main class="container">
+        <h1>Panel del administrador</h1>
+
+        <!-- ==================================================
+             LOGIN DEL ADMINISTRADOR
+        =================================================== -->
+        <section
+            id="login-panel"
+            class="card"
+        >
+            <h2>Acceso de administrador</h2>
+
+            <input
+                id="admin-password"
+                type="password"
+                placeholder="Contraseña"
+                onkeydown="
+                    if (event.key === 'Enter') {
+                        loginAdmin();
+                    }
+                "
+            >
+
+            <button
+                type="button"
+                id="login-button"
+                onclick="loginAdmin()"
+            >
+                Entrar
+            </button>
+
+            <p
+                id="login-message"
+                class="message"
+            ></p>
+        </section>
+
+
+        <!-- ==================================================
+             PANEL PRINCIPAL DEL ADMINISTRADOR
+        =================================================== -->
+        <section
+            id="admin-panel"
+            class="card hidden"
+        >
+            <h2>Control de la sala</h2>
+
+            <label for="category-select">
+                Selecciona una categoría
+            </label>
+
+            <select
+                id="category-select"
+                onchange="cargarPalabras()"
+            >
+                <option value="">
+                    Cargando categorías...
+                </option>
+            </select>
+
+
+            <label for="secret-word">
+                Selecciona la palabra secreta
+            </label>
+
+            <select id="secret-word">
+                <option value="">
+                    Selecciona primero una categoría
+                </option>
+            </select>
+
+
+            <div class="buttons">
+                <button
+                    id="create-button"
+                    type="button"
+                    onclick="crearSala()"
+                >
+                    Crear sala
+                </button>
+
+                <button
+                    id="new-round-button"
+                    type="button"
+                    class="secondary"
+                    onclick="nuevaRonda()"
+                    disabled
+                >
+                    Cambiar palabra y nueva ronda
+                </button>
+
+                <button
+                    id="start-button"
+                    type="button"
+                    onclick="iniciarPartida()"
+                    disabled
+                >
+                    Iniciar partida
+                </button>
+
+                <button
+                    id="finish-button"
+                    type="button"
+                    class="danger"
+                    onclick="finalizarPartida()"
+                    disabled
+                >
+                    Terminar partida
+                </button>
+            </div>
+
+            <p
+                id="admin-message"
+                class="message"
+            ></p>
+
+
+            <hr>
+
+
+            <!-- ==================================================
+                 INFORMACIÓN DE LA SALA
+            =================================================== -->
+            <h2>Información de la sala</h2>
+
+            <p>
+                Código de sala:
+                <strong id="game-code">-</strong>
+            </p>
+
+            <p>
+                Categoría:
+                <strong id="category-display">-</strong>
+            </p>
+
+            <p>
+                Estado:
+                <strong id="game-status">-</strong>
+            </p>
+
+            <p>
+                Tiempo:
+                <strong id="time-display">-</strong>
+            </p>
+
+            <p>
+                Palabra secreta:
+                <strong id="secret-display">-</strong>
+            </p>
+
+            <p>
+                Jugadores:
+                <strong id="player-count">0/10</strong>
+            </p>
+
+
+            <!-- ==================================================
+                 TABLA DE JUGADORES
+            =================================================== -->
+            <h2>Jugadores conectados</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Jugador</th>
+                        <th>Intentos</th>
+                        <th>Ganó</th>
+                        <th>Terminó</th>
+                    </tr>
+                </thead>
+
+                <tbody id="players-table"></tbody>
+            </table>
+
+
+            <!-- ==================================================
+                 PODIO
+            =================================================== -->
+            <div
+                id="admin-podium"
+                class="podium"
+            ></div>
+        </section>
+    </main>
+
+
+    <script>
+        /*
+         * Token del administrador.
+         *
+         * Se guarda en localStorage para que no tengas
+         * que escribir la contraseña cada vez que recargas.
+         */
+        let adminToken = localStorage.getItem(
+            "admin_token"
+        );
+
+
+        /*
+         * Aquí se guardan las categorías y palabras
+         * que devuelve el servidor.
+         */
+        let categorias = {};
+
+
+        /*
+         * Muestra el panel administrativo después
+         * de iniciar sesión.
+         */
+        function mostrarPanelAdmin() {
+            document
+                .getElementById("login-panel")
+                .classList.add("hidden");
+
+            document
+                .getElementById("admin-panel")
+                .classList.remove("hidden");
+
+            cargarCategorias();
+            cargarEstado();
+        }
+
+
+        /*
+         * Inicia sesión como administrador.
+         */
+        async function loginAdmin() {
+            const passwordInput =
+                document.getElementById(
+                    "admin-password"
+                );
+
+            const loginMessage =
+                document.getElementById(
+                    "login-message"
+                );
+
+            const password =
+                passwordInput.value.trim();
+
+            if (!password) {
+                loginMessage.textContent =
+                    "Escribe la contraseña.";
+
+                return;
+            }
+
+            loginMessage.textContent =
+                "Verificando contraseña...";
+
+            try {
+                const url =
+                    "/api/admin/login?password=" +
+                    encodeURIComponent(password);
+
+                console.log(
+                    "Enviando inicio de sesión a:",
+                    url
+                );
+
+                const respuesta = await fetch(
+                    url,
+                    {
+                        method: "POST"
+                    }
+                );
+
+                const datos =
+                    await respuesta.json();
+
+                console.log(
+                    "Respuesta del servidor:",
+                    respuesta.status,
+                    datos
+                );
+
+                if (!respuesta.ok) {
+                    loginMessage.textContent =
+                        datos.detail ||
+                        "Contraseña incorrecta.";
+
+                    return;
+                }
+
+                adminToken = datos.token;
+
+                localStorage.setItem(
+                    "admin_token",
+                    adminToken
+                );
+
+                loginMessage.textContent =
+                    "Acceso correcto.";
+
+                mostrarPanelAdmin();
+            } catch (error) {
+                console.error(
+                    "Error al iniciar sesión:",
+                    error
+                );
+
+                loginMessage.textContent =
+                    "No se pudo conectar con el servidor.";
+            }
+        }
+
+
+        /*
+         * Ejecuta peticiones que necesitan
+         * autorización de administrador.
+         */
+        async function peticionAdmin(
+            url,
+            opciones = {}
+        ) {
+            opciones.headers = {
+                ...opciones.headers,
+
+                "x-admin-token": adminToken,
+
+                "Content-Type":
+                    "application/json"
+            };
+
+            const respuesta = await fetch(
+                url,
+                opciones
+            );
+
+            const datos =
+                await respuesta.json();
+
+            if (!respuesta.ok) {
+                throw new Error(
+                    datos.detail ||
+                    "Error del servidor."
+                );
+            }
+
+            return datos;
+        }
+
+
+        /*
+         * Carga las categorías desde el backend.
+         */
+        async function cargarCategorias() {
+            try {
+                const datos =
+                    await peticionAdmin(
+                        "/api/admin/categorias"
+                    );
+
+                categorias = datos.categorias;
+
+                const selector =
+                    document.getElementById(
+                        "category-select"
+                    );
+
+                selector.innerHTML = `
+                    <option value="">
+                        Selecciona una categoría
+                    </option>
+                `;
+
+                for (
+                    const categoria of Object.keys(
+                        categorias
+                    )
+                ) {
+                    const opcion =
+                        document.createElement(
+                            "option"
+                        );
+
+                    opcion.value = categoria;
+                    opcion.textContent = categoria;
+
+                    selector.appendChild(
+                        opcion
+                    );
+                }
+
+                cargarPalabras();
+            } catch (error) {
+                mostrarMensaje(
+                    error.message
+                );
+            }
+        }
+
+
+        /*
+         * Carga las palabras relacionadas con
+         * la categoría seleccionada.
+         */
+        function cargarPalabras() {
+            const categoria =
+                document.getElementById(
+                    "category-select"
+                ).value;
+
+            const selector =
+                document.getElementById(
+                    "secret-word"
+                );
+
+            selector.innerHTML = "";
+
+            if (
+                !categoria ||
+                !categorias[categoria]
+            ) {
+                selector.innerHTML = `
+                    <option value="">
+                        Selecciona una categoría
+                    </option>
+                `;
+
+                return;
+            }
+
+            selector.innerHTML = `
+                <option value="">
+                    Selecciona una palabra
+                </option>
+            `;
+
+            for (
+                const palabra of categorias[
+                    categoria
+                ]
+            ) {
+                const opcion =
+                    document.createElement(
+                        "option"
+                    );
+
+                opcion.value = palabra;
+                opcion.textContent = palabra;
+
+                selector.appendChild(
+                    opcion
+                );
+            }
+        }
+
+
+        /*
+         * Muestra mensajes en el panel.
+         */
+        function mostrarMensaje(mensaje) {
+            document
+                .getElementById(
+                    "admin-message"
+                )
+                .textContent = mensaje;
+        }
+
+
+        /*
+         * Obtiene la categoría y palabra
+         * seleccionadas actualmente.
+         */
+        function obtenerDatosRonda() {
+            return {
+                categoria: document
+                    .getElementById(
+                        "category-select"
+                    )
+                    .value,
+
+                palabra: document
+                    .getElementById(
+                        "secret-word"
+                    )
+                    .value
+            };
+        }
+
+
+        /*
+         * Crea una sala completamente nueva.
+         *
+         * Esta función se usa para comenzar
+         * desde cero.
+         */
+        async function crearSala() {
+            const datosRonda =
+                obtenerDatosRonda();
+
+            if (
+                !datosRonda.categoria ||
+                !datosRonda.palabra
+            ) {
+                mostrarMensaje(
+                    "Selecciona una categoría " +
+                    "y una palabra."
+                );
+
+                return;
+            }
+
+            try {
+                const datos =
+                    await peticionAdmin(
+                        "/api/admin/partida",
+                        {
+                            method: "POST",
+
+                            body: JSON.stringify(
+                                datosRonda
+                            )
+                        }
+                    );
+
+                mostrarEstado(datos);
+
+                mostrarMensaje(
+                    "Sala creada correctamente. " +
+                    "Comparte el código con los jugadores."
+                );
+            } catch (error) {
+                mostrarMensaje(
+                    error.message
+                );
+            }
+        }
+
+
+        /*
+         * Crea una nueva ronda dentro de la misma sala.
+         *
+         * Conserva:
+         * - El mismo código.
+         * - Los mismos jugadores.
+         *
+         * Reinicia:
+         * - La palabra.
+         * - Los intentos.
+         * - El podio.
+         * - El tiempo.
+         */
+        async function nuevaRonda() {
+            const datosRonda =
+                obtenerDatosRonda();
+
+            if (
+                !datosRonda.categoria ||
+                !datosRonda.palabra
+            ) {
+                mostrarMensaje(
+                    "Selecciona una categoría " +
+                    "y una palabra."
+                );
+
+                return;
+            }
+
+            try {
+                const datos =
+                    await peticionAdmin(
+                        "/api/admin/partida/nueva-ronda",
+                        {
+                            method: "POST",
+
+                            body: JSON.stringify(
+                                datosRonda
+                            )
+                        }
+                    );
+
+                mostrarEstado(datos);
+
+                mostrarMensaje(
+                    "Nueva ronda creada en la misma sala. " +
+                    "Los jugadores se conservaron."
+                );
+            } catch (error) {
+                mostrarMensaje(
+                    error.message
+                );
+            }
+        }
+
+
+        /*
+         * Inicia la cuenta regresiva 3, 2, 1.
+         */
+        async function iniciarPartida() {
+            try {
+                const datos =
+                    await peticionAdmin(
+                        "/api/admin/partida/iniciar",
+                        {
+                            method: "POST"
+                        }
+                    );
+
+                mostrarEstado(datos);
+
+                mostrarMensaje(
+                    "La partida comenzará en " +
+                    "3, 2, 1..."
+                );
+            } catch (error) {
+                mostrarMensaje(
+                    error.message
+                );
+            }
+        }
+
+
+        /*
+         * Finaliza manualmente la ronda
+         * y permite mostrar el podio.
+         */
+        async function finalizarPartida() {
+            try {
+                const datos =
+                    await peticionAdmin(
+                        "/api/admin/partida/finalizar",
+                        {
+                            method: "POST"
+                        }
+                    );
+
+                mostrarEstado(datos);
+
+                mostrarMensaje(
+                    "Partida terminada. " +
+                    "El podio está disponible."
+                );
+            } catch (error) {
+                mostrarMensaje(
+                    error.message
+                );
+            }
+        }
+
+
+        /*
+         * Consulta el estado actual de la sala.
+         */
+        async function cargarEstado() {
+            try {
+                const datos =
+                    await peticionAdmin(
+                        "/api/admin/partida"
+                    );
+
+                mostrarEstado(datos);
+            } catch (error) {
+                console.log(
+                    "Todavía no hay una partida:",
+                    error.message
+                );
+            }
+        }
+
+
+        /*
+         * Actualiza la información visual.
+         */
+        function mostrarEstado(datos) {
+            document
+                .getElementById(
+                    "game-code"
+                )
+                .textContent =
+                datos.codigo || "-";
+
+            document
+                .getElementById(
+                    "category-display"
+                )
+                .textContent =
+                datos.categoria || "-";
+
+            document
+                .getElementById(
+                    "game-status"
+                )
+                .textContent =
+                datos.estado || "-";
+
+            document
+                .getElementById(
+                    "secret-display"
+                )
+                .textContent =
+                datos.palabra_secreta || "-";
+
+            document
+                .getElementById(
+                    "player-count"
+                )
+                .textContent =
+                `${datos.total_jugadores}/` +
+                `${datos.max_jugadores}`;
+
+
+            const timeDisplay =
+                document.getElementById(
+                    "time-display"
+                );
+
+            if (
+                datos.estado === "INICIANDO"
+            ) {
+                timeDisplay.textContent =
+                    "Iniciando en " +
+                    datos.cuenta_regresiva +
+                    "...";
+            } else if (
+                datos.estado === "EN_CURSO"
+            ) {
+                timeDisplay.textContent =
+                    datos.segundos_restantes +
+                    " segundos";
+            } else if (
+                datos.estado === "FINALIZADA"
+            ) {
+                timeDisplay.textContent =
+                    "Finalizada";
+            } else {
+                timeDisplay.textContent =
+                    "Esperando jugadores";
+            }
+
+
+            const createButton =
+                document.getElementById(
+                    "create-button"
+                );
+
+            const newRoundButton =
+                document.getElementById(
+                    "new-round-button"
+                );
+
+            const startButton =
+                document.getElementById(
+                    "start-button"
+                );
+
+            const finishButton =
+                document.getElementById(
+                    "finish-button"
+                );
+
+
+            /*
+             * Crear sala se permite si:
+             * - Todavía no existe una sala.
+             * - La sala finalizó.
+             */
+            createButton.disabled = false;
+
+
+            /*
+             * Nueva ronda solo se permite
+             * cuando la ronda anterior terminó.
+             */
+            newRoundButton.disabled =
+                datos.estado !== "FINALIZADA";
+
+
+            /*
+             * Iniciar solamente en espera.
+             */
+            startButton.disabled =
+                datos.estado !==
+                "ESPERANDO_JUGADORES";
+
+
+            /*
+             * Terminar durante cuenta regresiva
+             * o durante la partida.
+             */
+            finishButton.disabled =
+                datos.estado !== "INICIANDO" &&
+                datos.estado !== "EN_CURSO";
+
+
+            const tabla =
+                document.getElementById(
+                    "players-table"
+                );
+
+            tabla.innerHTML = "";
+
+            for (
+                const jugador of (
+                    datos.jugadores || []
+                )
+            ) {
+                const fila =
+                    document.createElement(
+                        "tr"
+                    );
+
+                fila.innerHTML = `
+                    <td>
+                        ${jugador.nombre}
+                    </td>
+
+                    <td>
+                        ${jugador.intentos}
+                    </td>
+
+                    <td>
+                        ${
+                            jugador.gano
+                                ? "Sí"
+                                : "No"
+                        }
+                    </td>
+
+                    <td>
+                        ${
+                            jugador.terminado
+                                ? "Sí"
+                                : "No"
+                        }
+                    </td>
+                `;
+
+                tabla.appendChild(
+                    fila
+                );
+            }
+
+
+            const podio =
+                document.getElementById(
+                    "admin-podium"
+                );
+
+            /*
+             * El podio solo aparece después
+             * de finalizar la partida.
+             */
+            if (
+                datos.estado === "FINALIZADA" &&
+                datos.podio
+            ) {
+                mostrarPodio(
+                    datos.podio
+                );
+            } else {
+                podio.innerHTML = "";
+            }
+        }
+
+
+        /*
+         * Muestra el podio final.
+         */
+        function mostrarPodio(podio) {
+            const contenedor =
+                document.getElementById(
+                    "admin-podium"
+                );
+
+            contenedor.innerHTML = `
+                <h2>🏆 Podio final</h2>
+
+                <ol>
+                    ${
+                        podio.map(
+                            jugador => `
+                                <li>
+                                    <strong>
+                                        ${jugador.nombre}
+                                    </strong>
+
+                                    -
+
+                                    ${jugador.intentos}
+                                    intento(s)
+
+                                    ${
+                                        jugador.gano
+                                            ? " ✅"
+                                            : " ❌"
+                                    }
+
+                                    ${
+                                        jugador.tiempo_segundos !== null
+                                            ? " - " +
+                                              jugador.tiempo_segundos +
+                                              " segundos"
+                                            : ""
+                                    }
+                                </li>
+                            `
+                        ).join("")
+                    }
+                </ol>
+            `;
+        }
+
+
+        /*
+         * Si ya había una sesión guardada,
+         * mostrar directamente el panel.
+         */
+        if (adminToken) {
+            mostrarPanelAdmin();
+        }
+
+
+        /*
+         * Actualiza el estado cada segundo.
+         */
+        setInterval(
+            () => {
+                if (adminToken) {
+                    cargarEstado();
+                }
+            },
+            1000
+        );
+    </script>
+</body>
+</html>
