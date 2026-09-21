@@ -17,22 +17,67 @@
 </head>
 
 <body>
-    <main class="container">
-        <h1>Panel del administrador</h1>
+    <div
+        id="countdown-overlay"
+        class="countdown-overlay hidden"
+    >
+        <div class="countdown-card">
+            <div class="countdown-title">
+                La partida comienza en
+            </div>
 
-        <!-- ==================================================
-             LOGIN DEL ADMINISTRADOR
-        =================================================== -->
+            <div
+                id="countdown-number"
+                class="countdown-number"
+            >
+                3
+            </div>
+
+            <div class="countdown-subtitle">
+                Prepárate para jugar
+            </div>
+        </div>
+    </div>
+
+
+    <main class="container">
+        <header class="page-header">
+            <div class="brand">
+                <div class="brand-icon">
+                    🎯
+                </div>
+
+                <div>
+                    <h1>Semantle Español</h1>
+
+                    <p class="subtitle">
+                        Panel de control del administrador
+                    </p>
+                </div>
+            </div>
+        </header>
+
+
         <section
             id="login-panel"
-            class="card"
+            class="card auth-card"
         >
-            <h2>Acceso de administrador</h2>
+            <div class="panel-title">
+                <div class="panel-title-icon">
+                    🔐
+                </div>
+
+                <h2>Acceso de administrador</h2>
+            </div>
+
+            <label for="admin-password">
+                Contraseña
+            </label>
 
             <input
                 id="admin-password"
                 type="password"
-                placeholder="Contraseña"
+                placeholder="Escribe la contraseña"
                 onkeydown="
                     if (event.key === 'Enter') {
                         loginAdmin();
@@ -41,11 +86,11 @@
             >
 
             <button
-                type="button"
                 id="login-button"
+                type="button"
                 onclick="loginAdmin()"
             >
-                Entrar
+                Entrar al panel
             </button>
 
             <p
@@ -55,177 +100,291 @@
         </section>
 
 
-        <!-- ==================================================
-             PANEL PRINCIPAL DEL ADMINISTRADOR
-        =================================================== -->
         <section
             id="admin-panel"
-            class="card hidden"
+            class="hidden"
         >
-            <h2>Control de la sala</h2>
+            <div class="card">
+                <div class="panel-title">
+                    <div class="panel-title-icon">
+                        🎮
+                    </div>
 
-            <label for="category-select">
-                Selecciona una categoría
-            </label>
+                    <h2>Control de la sala</h2>
+                </div>
 
-            <select
-                id="category-select"
-                onchange="cargarPalabras()"
-            >
-                <option value="">
-                    Cargando categorías...
-                </option>
-            </select>
+                <label for="category-select">
+                    Categoría
+                </label>
 
-
-            <label for="secret-word">
-                Selecciona la palabra secreta
-            </label>
-
-            <select id="secret-word">
-                <option value="">
-                    Selecciona primero una categoría
-                </option>
-            </select>
-
-
-            <div class="buttons">
-                <button
-                    id="create-button"
-                    type="button"
-                    onclick="crearSala()"
+                <select
+                    id="category-select"
+                    onchange="cargarPalabras()"
                 >
-                    Crear sala
-                </button>
+                    <option value="">
+                        Cargando categorías...
+                    </option>
+                </select>
 
-                <button
-                    id="new-round-button"
-                    type="button"
-                    class="secondary"
-                    onclick="nuevaRonda()"
-                    disabled
-                >
-                    Cambiar palabra y nueva ronda
-                </button>
+                <label for="secret-word">
+                    Palabra secreta
+                </label>
 
-                <button
-                    id="start-button"
-                    type="button"
-                    onclick="iniciarPartida()"
-                    disabled
-                >
-                    Iniciar partida
-                </button>
+                <select id="secret-word">
+                    <option value="">
+                        Selecciona primero una categoría
+                    </option>
+                </select>
 
-                <button
-                    id="finish-button"
-                    type="button"
-                    class="danger"
-                    onclick="finalizarPartida()"
-                    disabled
-                >
-                    Terminar partida
-                </button>
+                <div class="buttons">
+                    <button
+                        id="create-button"
+                        type="button"
+                        onclick="crearSala()"
+                    >
+                        Crear sala
+                    </button>
+
+                    <button
+                        id="new-round-button"
+                        type="button"
+                        class="secondary"
+                        onclick="nuevaRonda()"
+                        disabled
+                    >
+                        Nueva ronda
+                    </button>
+
+                    <button
+                        id="start-button"
+                        type="button"
+                        onclick="iniciarPartida()"
+                        disabled
+                    >
+                        Iniciar partida
+                    </button>
+
+                    <button
+                        id="finish-button"
+                        type="button"
+                        class="danger"
+                        onclick="finalizarPartida()"
+                        disabled
+                    >
+                        Terminar partida
+                    </button>
+                </div>
+
+                <p
+                    id="admin-message"
+                    class="message"
+                ></p>
             </div>
 
-            <p
-                id="admin-message"
-                class="message"
-            ></p>
+
+            <div class="card">
+                <div class="panel-title">
+                    <div class="panel-title-icon">
+                        📊
+                    </div>
+
+                    <h2>Estado de la sala</h2>
+                </div>
+
+                <div class="game-info-grid">
+                    <div class="info-item">
+                        <span class="info-label">
+                            Código
+                        </span>
+
+                        <strong
+                            id="game-code"
+                            class="info-value"
+                        >
+                            -
+                        </strong>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="info-label">
+                            Ronda
+                        </span>
+
+                        <strong
+                            id="round-number"
+                            class="info-value"
+                        >
+                            1
+                        </strong>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="info-label">
+                            Categoría
+                        </span>
+
+                        <strong
+                            id="category-display"
+                            class="info-value"
+                        >
+                            -
+                        </strong>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="info-label">
+                            Estado
+                        </span>
+
+                        <strong
+                            id="game-status"
+                            class="info-value"
+                        >
+                            -
+                        </strong>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="info-label">
+                            Tiempo
+                        </span>
+
+                        <strong
+                            id="time-display"
+                            class="info-value"
+                        >
+                            -
+                        </strong>
+                    </div>
+                </div>
+
+                <p>
+                    Palabra secreta:
+                    <strong id="secret-display">
+                        -
+                    </strong>
+                </p>
+
+                <p>
+                    Jugadores conectados:
+                    <strong id="player-count">
+                        0/10
+                    </strong>
+                </p>
+            </div>
 
 
-            <hr>
+            <div class="card">
+                <div class="panel-title">
+                    <div class="panel-title-icon">
+                        👥
+                    </div>
+
+                    <h2>Jugadores conectados</h2>
+                </div>
+
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Jugador</th>
+                                <th>Intentos</th>
+                                <th>Ganó</th>
+                                <th>Terminó</th>
+                            </tr>
+                        </thead>
+
+                        <tbody
+                            id="players-table"
+                        ></tbody>
+                    </table>
+                </div>
+            </div>
 
 
-            <!-- ==================================================
-                 INFORMACIÓN DE LA SALA
-            =================================================== -->
-            <h2>Información de la sala</h2>
-
-            <p>
-                Código de sala:
-                <strong id="game-code">-</strong>
-            </p>
-
-            <p>
-                Categoría:
-                <strong id="category-display">-</strong>
-            </p>
-
-            <p>
-                Estado:
-                <strong id="game-status">-</strong>
-            </p>
-
-            <p>
-                Tiempo:
-                <strong id="time-display">-</strong>
-            </p>
-
-            <p>
-                Palabra secreta:
-                <strong id="secret-display">-</strong>
-            </p>
-
-            <p>
-                Jugadores:
-                <strong id="player-count">0/10</strong>
-            </p>
-
-
-            <!-- ==================================================
-                 TABLA DE JUGADORES
-            =================================================== -->
-            <h2>Jugadores conectados</h2>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>Jugador</th>
-                        <th>Intentos</th>
-                        <th>Ganó</th>
-                        <th>Terminó</th>
-                    </tr>
-                </thead>
-
-                <tbody id="players-table"></tbody>
-            </table>
-
-
-            <!-- ==================================================
-                 PODIO
-            =================================================== -->
             <div
                 id="admin-podium"
-                class="podium"
+                class="podium hidden"
             ></div>
+
+
+            <div class="card">
+                <div class="panel-title">
+                    <div class="panel-title-icon">
+                        🏅
+                    </div>
+
+                    <h2>
+                        Mejores jugadores de la ronda
+                    </h2>
+                </div>
+
+                <div
+                    id="current-round-ranking"
+                    class="ranking-list"
+                >
+                    <p class="ranking-empty">
+                        La ronda todavía no termina.
+                    </p>
+                </div>
+            </div>
+
+
+            <div class="card">
+                <div class="panel-title">
+                    <div class="panel-title-icon">
+                        🏆
+                    </div>
+
+                    <h2>
+                        Ranking acumulado
+                    </h2>
+                </div>
+
+                <div
+                    id="overall-ranking"
+                    class="ranking-list"
+                >
+                    <p class="ranking-empty">
+                        Todavía no hay rondas terminadas.
+                    </p>
+                </div>
+            </div>
+
+
+            <div class="card">
+                <div class="panel-title">
+                    <div class="panel-title-icon">
+                        🗂️
+                    </div>
+
+                    <h2>
+                        Historial de rondas
+                    </h2>
+                </div>
+
+                <div
+                    id="round-history"
+                    class="round-history"
+                >
+                    <p class="ranking-empty">
+                        Todavía no hay rondas terminadas.
+                    </p>
+                </div>
+            </div>
         </section>
     </main>
 
 
     <script>
-        /*
-         * Token del administrador.
-         *
-         * Se guarda en localStorage para que no tengas
-         * que escribir la contraseña cada vez que recargas.
-         */
         let adminToken = localStorage.getItem(
             "admin_token"
         );
 
-
-        /*
-         * Aquí se guardan las categorías y palabras
-         * que devuelve el servidor.
-         */
         let categorias = {};
+        let ultimaCuentaRegresiva = null;
 
 
-        /*
-         * Muestra el panel administrativo después
-         * de iniciar sesión.
-         */
         function mostrarPanelAdmin() {
             document
                 .getElementById("login-panel")
@@ -240,45 +399,34 @@
         }
 
 
-        /*
-         * Inicia sesión como administrador.
-         */
         async function loginAdmin() {
-            const passwordInput =
+            const input =
                 document.getElementById(
                     "admin-password"
                 );
 
-            const loginMessage =
+            const mensaje =
                 document.getElementById(
                     "login-message"
                 );
 
             const password =
-                passwordInput.value.trim();
+                input.value.trim();
 
             if (!password) {
-                loginMessage.textContent =
+                mensaje.textContent =
                     "Escribe la contraseña.";
 
                 return;
             }
 
-            loginMessage.textContent =
+            mensaje.textContent =
                 "Verificando contraseña...";
 
             try {
-                const url =
-                    "/api/admin/login?password=" +
-                    encodeURIComponent(password);
-
-                console.log(
-                    "Enviando inicio de sesión a:",
-                    url
-                );
-
                 const respuesta = await fetch(
-                    url,
+                    "/api/admin/login?password=" +
+                    encodeURIComponent(password),
                     {
                         method: "POST"
                     }
@@ -287,14 +435,8 @@
                 const datos =
                     await respuesta.json();
 
-                console.log(
-                    "Respuesta del servidor:",
-                    respuesta.status,
-                    datos
-                );
-
                 if (!respuesta.ok) {
-                    loginMessage.textContent =
+                    mensaje.textContent =
                         datos.detail ||
                         "Contraseña incorrecta.";
 
@@ -308,35 +450,23 @@
                     adminToken
                 );
 
-                loginMessage.textContent =
-                    "Acceso correcto.";
-
                 mostrarPanelAdmin();
             } catch (error) {
-                console.error(
-                    "Error al iniciar sesión:",
-                    error
-                );
+                console.error(error);
 
-                loginMessage.textContent =
+                mensaje.textContent =
                     "No se pudo conectar con el servidor.";
             }
         }
 
 
-        /*
-         * Ejecuta peticiones que necesitan
-         * autorización de administrador.
-         */
         async function peticionAdmin(
             url,
             opciones = {}
         ) {
             opciones.headers = {
                 ...opciones.headers,
-
                 "x-admin-token": adminToken,
-
                 "Content-Type":
                     "application/json"
             };
@@ -360,9 +490,6 @@
         }
 
 
-        /*
-         * Carga las categorías desde el backend.
-         */
         async function cargarCategorias() {
             try {
                 const datos =
@@ -403,17 +530,11 @@
 
                 cargarPalabras();
             } catch (error) {
-                mostrarMensaje(
-                    error.message
-                );
+                mostrarMensaje(error.message);
             }
         }
 
 
-        /*
-         * Carga las palabras relacionadas con
-         * la categoría seleccionada.
-         */
         function cargarPalabras() {
             const categoria =
                 document.getElementById(
@@ -437,6 +558,8 @@
                     </option>
                 `;
 
+                actualizarBotonNuevaRonda();
+
                 return;
             }
 
@@ -447,9 +570,7 @@
             `;
 
             for (
-                const palabra of categorias[
-                    categoria
-                ]
+                const palabra of categorias[categoria]
             ) {
                 const opcion =
                     document.createElement(
@@ -463,25 +584,11 @@
                     opcion
                 );
             }
+
+            actualizarBotonNuevaRonda();
         }
 
 
-        /*
-         * Muestra mensajes en el panel.
-         */
-        function mostrarMensaje(mensaje) {
-            document
-                .getElementById(
-                    "admin-message"
-                )
-                .textContent = mensaje;
-        }
-
-
-        /*
-         * Obtiene la categoría y palabra
-         * seleccionadas actualmente.
-         */
         function obtenerDatosRonda() {
             return {
                 categoria: document
@@ -499,117 +606,90 @@
         }
 
 
-        /*
-         * Crea una sala completamente nueva.
-         *
-         * Esta función se usa para comenzar
-         * desde cero.
-         */
+        function mostrarMensaje(mensaje) {
+            document
+                .getElementById(
+                    "admin-message"
+                )
+                .textContent = mensaje;
+        }
+
+
         async function crearSala() {
-            const datosRonda =
+            const datos =
                 obtenerDatosRonda();
 
             if (
-                !datosRonda.categoria ||
-                !datosRonda.palabra
+                !datos.categoria ||
+                !datos.palabra
             ) {
                 mostrarMensaje(
-                    "Selecciona una categoría " +
-                    "y una palabra."
+                    "Selecciona una categoría y una palabra."
                 );
 
                 return;
             }
 
             try {
-                const datos =
+                const estado =
                     await peticionAdmin(
                         "/api/admin/partida",
                         {
                             method: "POST",
-
-                            body: JSON.stringify(
-                                datosRonda
-                            )
+                            body: JSON.stringify(datos)
                         }
                     );
 
-                mostrarEstado(datos);
+                mostrarEstado(estado);
 
                 mostrarMensaje(
-                    "Sala creada correctamente. " +
-                    "Comparte el código con los jugadores."
+                    "Sala creada correctamente."
                 );
             } catch (error) {
-                mostrarMensaje(
-                    error.message
-                );
+                mostrarMensaje(error.message);
             }
         }
 
 
-        /*
-         * Crea una nueva ronda dentro de la misma sala.
-         *
-         * Conserva:
-         * - El mismo código.
-         * - Los mismos jugadores.
-         *
-         * Reinicia:
-         * - La palabra.
-         * - Los intentos.
-         * - El podio.
-         * - El tiempo.
-         */
         async function nuevaRonda() {
-            const datosRonda =
+            const datos =
                 obtenerDatosRonda();
 
             if (
-                !datosRonda.categoria ||
-                !datosRonda.palabra
+                !datos.categoria ||
+                !datos.palabra
             ) {
                 mostrarMensaje(
-                    "Selecciona una categoría " +
-                    "y una palabra."
+                    "Selecciona categoría y palabra."
                 );
 
                 return;
             }
 
             try {
-                const datos =
+                const estado =
                     await peticionAdmin(
                         "/api/admin/partida/nueva-ronda",
                         {
                             method: "POST",
-
-                            body: JSON.stringify(
-                                datosRonda
-                            )
+                            body: JSON.stringify(datos)
                         }
                     );
 
-                mostrarEstado(datos);
+                mostrarEstado(estado);
 
                 mostrarMensaje(
-                    "Nueva ronda creada en la misma sala. " +
-                    "Los jugadores se conservaron."
+                    "Categoría y palabra actualizadas."
                 );
             } catch (error) {
-                mostrarMensaje(
-                    error.message
-                );
+                mostrarMensaje(error.message);
             }
         }
 
 
-        /*
-         * Inicia la cuenta regresiva 3, 2, 1.
-         */
         async function iniciarPartida() {
             try {
-                const datos =
+                const estado =
                     await peticionAdmin(
                         "/api/admin/partida/iniciar",
                         {
@@ -617,27 +697,20 @@
                         }
                     );
 
-                mostrarEstado(datos);
+                mostrarEstado(estado);
 
                 mostrarMensaje(
-                    "La partida comenzará en " +
-                    "3, 2, 1..."
+                    "La partida comenzará en 3, 2, 1..."
                 );
             } catch (error) {
-                mostrarMensaje(
-                    error.message
-                );
+                mostrarMensaje(error.message);
             }
         }
 
 
-        /*
-         * Finaliza manualmente la ronda
-         * y permite mostrar el podio.
-         */
         async function finalizarPartida() {
             try {
-                const datos =
+                const estado =
                     await peticionAdmin(
                         "/api/admin/partida/finalizar",
                         {
@@ -645,160 +718,241 @@
                         }
                     );
 
-                mostrarEstado(datos);
+                mostrarEstado(estado);
 
                 mostrarMensaje(
-                    "Partida terminada. " +
-                    "El podio está disponible."
+                    "Partida terminada. Podio disponible."
                 );
             } catch (error) {
-                mostrarMensaje(
-                    error.message
-                );
+                mostrarMensaje(error.message);
             }
         }
 
 
-        /*
-         * Consulta el estado actual de la sala.
-         */
         async function cargarEstado() {
             try {
-                const datos =
+                const estado =
                     await peticionAdmin(
                         "/api/admin/partida"
                     );
 
-                mostrarEstado(datos);
+                mostrarEstado(estado);
             } catch (error) {
-                console.log(
-                    "Todavía no hay una partida:",
-                    error.message
-                );
+                console.log(error.message);
             }
         }
 
 
-        /*
-         * Actualiza la información visual.
-         */
+        function actualizarBotonNuevaRonda() {
+            const boton =
+                document.getElementById(
+                    "new-round-button"
+                );
+
+            const datos =
+                obtenerDatosRonda();
+
+            const categoriaValida =
+                Boolean(datos.categoria);
+
+            const palabraValida =
+                Boolean(datos.palabra);
+
+            if (
+                categoriaValida &&
+                palabraValida
+            ) {
+                boton.disabled = false;
+            }
+        }
+
+
+        function mostrarCuentaRegresiva(
+            numero
+        ) {
+            const overlay =
+                document.getElementById(
+                    "countdown-overlay"
+                );
+
+            const elemento =
+                document.getElementById(
+                    "countdown-number"
+                );
+
+            if (!overlay || !elemento) {
+                return;
+            }
+
+            if (!numero || numero <= 0) {
+                overlay.classList.add("hidden");
+                ultimaCuentaRegresiva = null;
+                return;
+            }
+
+            if (
+                ultimaCuentaRegresiva === numero
+            ) {
+                return;
+            }
+
+            ultimaCuentaRegresiva = numero;
+
+            elemento.textContent = numero;
+
+            elemento.classList.remove(
+                "countdown-3",
+                "countdown-2",
+                "countdown-1"
+            );
+
+            elemento.classList.add(
+                "countdown-" + numero
+            );
+
+            overlay.classList.remove("hidden");
+
+            elemento.style.animation = "none";
+
+            void elemento.offsetWidth;
+
+            elemento.style.animation =
+                "countdown-pop 0.85s ease-in-out";
+        }
+
+
+        function estadoVisual(estado) {
+            if (estado === "INICIANDO") {
+                return "status-starting";
+            }
+
+            if (estado === "EN_CURSO") {
+                return "status-playing";
+            }
+
+            if (estado === "FINALIZADA") {
+                return "status-finished";
+            }
+
+            return "status-waiting";
+        }
+
+
         function mostrarEstado(datos) {
+            if (datos.estado === "INICIANDO") {
+                mostrarCuentaRegresiva(
+                    datos.cuenta_regresiva
+                );
+            } else {
+                mostrarCuentaRegresiva(0);
+            }
+
             document
-                .getElementById(
-                    "game-code"
-                )
+                .getElementById("game-code")
                 .textContent =
                 datos.codigo || "-";
 
             document
-                .getElementById(
-                    "category-display"
-                )
+                .getElementById("round-number")
+                .textContent =
+                datos.numero_ronda || 1;
+
+            document
+                .getElementById("category-display")
                 .textContent =
                 datos.categoria || "-";
 
-            document
-                .getElementById(
+            const estado =
+                document.getElementById(
                     "game-status"
-                )
-                .textContent =
+                );
+
+            estado.textContent =
                 datos.estado || "-";
 
+            estado.className =
+                "info-value " +
+                estadoVisual(datos.estado);
+
             document
-                .getElementById(
-                    "secret-display"
-                )
+                .getElementById("secret-display")
                 .textContent =
                 datos.palabra_secreta || "-";
 
             document
-                .getElementById(
-                    "player-count"
-                )
+                .getElementById("player-count")
                 .textContent =
                 `${datos.total_jugadores}/` +
                 `${datos.max_jugadores}`;
 
 
-            const timeDisplay =
+            const tiempo =
                 document.getElementById(
                     "time-display"
                 );
 
-            if (
-                datos.estado === "INICIANDO"
-            ) {
-                timeDisplay.textContent =
+            if (datos.estado === "INICIANDO") {
+                tiempo.textContent =
                     "Iniciando en " +
                     datos.cuenta_regresiva +
                     "...";
             } else if (
                 datos.estado === "EN_CURSO"
             ) {
-                timeDisplay.textContent =
+                tiempo.textContent =
                     datos.segundos_restantes +
                     " segundos";
             } else if (
                 datos.estado === "FINALIZADA"
             ) {
-                timeDisplay.textContent =
+                tiempo.textContent =
                     "Finalizada";
             } else {
-                timeDisplay.textContent =
+                tiempo.textContent =
                     "Esperando jugadores";
             }
 
 
-            const createButton =
+            const botonCrear =
                 document.getElementById(
                     "create-button"
                 );
 
-            const newRoundButton =
+            const botonNuevaRonda =
                 document.getElementById(
                     "new-round-button"
                 );
 
-            const startButton =
+            const botonIniciar =
                 document.getElementById(
                     "start-button"
                 );
 
-            const finishButton =
+            const botonFinalizar =
                 document.getElementById(
                     "finish-button"
                 );
 
 
-            /*
-             * Crear sala se permite si:
-             * - Todavía no existe una sala.
-             * - La sala finalizó.
-             */
-            createButton.disabled = false;
+            botonCrear.disabled = false;
 
+            botonNuevaRonda.disabled =
+                !(
+                    (
+                        datos.estado ===
+                        "ESPERANDO_JUGADORES"
+                    ) ||
+                    (
+                        datos.estado ===
+                        "FINALIZADA"
+                    )
+                );
 
-            /*
-             * Nueva ronda solo se permite
-             * cuando la ronda anterior terminó.
-             */
-            newRoundButton.disabled =
-                datos.estado !== "FINALIZADA";
-
-
-            /*
-             * Iniciar solamente en espera.
-             */
-            startButton.disabled =
+            botonIniciar.disabled =
                 datos.estado !==
                 "ESPERANDO_JUGADORES";
 
-
-            /*
-             * Terminar durante cuenta regresiva
-             * o durante la partida.
-             */
-            finishButton.disabled =
+            botonFinalizar.disabled =
                 datos.estado !== "INICIANDO" &&
                 datos.estado !== "EN_CURSO";
 
@@ -821,14 +975,8 @@
                     );
 
                 fila.innerHTML = `
-                    <td>
-                        ${jugador.nombre}
-                    </td>
-
-                    <td>
-                        ${jugador.intentos}
-                    </td>
-
+                    <td>${jugador.nombre}</td>
+                    <td>${jugador.intentos}</td>
                     <td>
                         ${
                             jugador.gano
@@ -836,7 +984,6 @@
                                 : "No"
                         }
                     </td>
-
                     <td>
                         ${
                             jugador.terminado
@@ -846,9 +993,7 @@
                     </td>
                 `;
 
-                tabla.appendChild(
-                    fila
-                );
+                tabla.appendChild(fila);
             }
 
 
@@ -857,46 +1002,265 @@
                     "admin-podium"
                 );
 
-            /*
-             * El podio solo aparece después
-             * de finalizar la partida.
-             */
             if (
                 datos.estado === "FINALIZADA" &&
                 datos.podio
             ) {
-                mostrarPodio(
-                    datos.podio
-                );
+                mostrarPodio(datos.podio);
             } else {
                 podio.innerHTML = "";
+                podio.classList.add("hidden");
             }
+
+            mostrarRankingRonda(
+                datos.estado === "FINALIZADA"
+                    ? datos.podio || []
+                    : []
+            );
+
+            mostrarRankingAcumulado(
+                datos.ranking_acumulado || []
+            );
+
+            mostrarHistorialRondas(
+                datos.historial_rondas || []
+            );
         }
 
 
-        /*
-         * Muestra el podio final.
-         */
+        function obtenerMedalla(posicion) {
+            if (posicion === 1) {
+                return "🥇";
+            }
+
+            if (posicion === 2) {
+                return "🥈";
+            }
+
+            if (posicion === 3) {
+                return "🥉";
+            }
+
+            return posicion;
+        }
+
+
+        function mostrarRankingRonda(podio) {
+            const contenedor =
+                document.getElementById(
+                    "current-round-ranking"
+                );
+
+            if (!podio.length) {
+                contenedor.innerHTML = `
+                    <p class="ranking-empty">
+                        La ronda todavía no termina.
+                    </p>
+                `;
+
+                return;
+            }
+
+            contenedor.innerHTML =
+                podio.slice(0, 3).map(
+                    jugador => `
+                        <div
+                            class="
+                                ranking-row
+                                ranking-row-${jugador.posicion}
+                            "
+                        >
+                            <span
+                                class="ranking-position"
+                            >
+                                ${obtenerMedalla(
+                                    jugador.posicion
+                                )}
+                            </span>
+
+                            <strong>
+                                ${jugador.nombre}
+                            </strong>
+
+                            <span>
+                                ${jugador.intentos}
+                                intento(s)
+                            </span>
+
+                            <span>
+                                ${
+                                    jugador.gano
+                                        ? "Ganó"
+                                        : "No acertó"
+                                }
+                            </span>
+                        </div>
+                    `
+                ).join("");
+        }
+
+
+        function mostrarRankingAcumulado(
+            ranking
+        ) {
+            const contenedor =
+                document.getElementById(
+                    "overall-ranking"
+                );
+
+            if (!ranking.length) {
+                contenedor.innerHTML = `
+                    <p class="ranking-empty">
+                        Todavía no hay rondas terminadas.
+                    </p>
+                `;
+
+                return;
+            }
+
+            contenedor.innerHTML =
+                ranking.slice(0, 10).map(
+                    jugador => `
+                        <div
+                            class="
+                                ranking-row
+                                ranking-row-${jugador.posicion}
+                            "
+                        >
+                            <span
+                                class="ranking-position"
+                            >
+                                ${
+                                    jugador.posicion <= 3
+                                        ? obtenerMedalla(
+                                            jugador.posicion
+                                        )
+                                        : jugador.posicion
+                                }
+                            </span>
+
+                            <strong>
+                                ${jugador.nombre}
+                            </strong>
+
+                            <span>
+                                ${jugador.puntos}
+                                puntos
+                            </span>
+
+                            <span>
+                                ${jugador.victorias}
+                                victoria(s)
+                            </span>
+
+                            <span>
+                                ${jugador.podios}
+                                podio(s)
+                            </span>
+                        </div>
+                    `
+                ).join("");
+        }
+
+
+        function mostrarHistorialRondas(
+            historial
+        ) {
+            const contenedor =
+                document.getElementById(
+                    "round-history"
+                );
+
+            if (!historial.length) {
+                contenedor.innerHTML = `
+                    <p class="ranking-empty">
+                        Todavía no hay rondas terminadas.
+                    </p>
+                `;
+
+                return;
+            }
+
+            contenedor.innerHTML =
+                [...historial]
+                    .reverse()
+                    .map(
+                        ronda => `
+                            <article
+                                class="round-history-card"
+                            >
+                                <div
+                                    class="
+                                        round-history-header
+                                    "
+                                >
+                                    <strong>
+                                        Ronda
+                                        ${ronda.ronda}
+                                    </strong>
+
+                                    <span>
+                                        ${ronda.categoria}
+                                    </span>
+                                </div>
+
+                                <ol>
+                                    ${
+                                        ronda.podio
+                                            .slice(0, 3)
+                                            .map(
+                                                jugador => `
+                                                    <li>
+                                                        ${obtenerMedalla(
+                                                            jugador.posicion
+                                                        )}
+
+                                                        <strong>
+                                                            ${jugador.nombre}
+                                                        </strong>
+
+                                                        —
+                                                        ${jugador.intentos}
+                                                        intento(s)
+                                                    </li>
+                                                `
+                                            )
+                                            .join("")
+                                    }
+                                </ol>
+                            </article>
+                        `
+                    )
+                    .join("");
+        }
+
+
         function mostrarPodio(podio) {
             const contenedor =
                 document.getElementById(
                     "admin-podium"
                 );
 
+            if (!podio || !podio.length) {
+                contenedor.innerHTML = "";
+                contenedor.classList.add("hidden");
+
+                return;
+            }
+
             contenedor.innerHTML = `
-                <h2>🏆 Podio final</h2>
+                <h2>🏆 Podio de la ronda</h2>
 
                 <ol>
                     ${
-                        podio.map(
+                        podio.slice(0, 3).map(
                             jugador => `
                                 <li>
                                     <strong>
                                         ${jugador.nombre}
                                     </strong>
 
-                                    -
-
+                                    —
                                     ${jugador.intentos}
                                     intento(s)
 
@@ -905,35 +1269,37 @@
                                             ? " ✅"
                                             : " ❌"
                                     }
-
-                                    ${
-                                        jugador.tiempo_segundos !== null
-                                            ? " - " +
-                                              jugador.tiempo_segundos +
-                                              " segundos"
-                                            : ""
-                                    }
                                 </li>
                             `
                         ).join("")
                     }
                 </ol>
             `;
+
+            contenedor.classList.remove("hidden");
         }
 
 
-        /*
-         * Si ya había una sesión guardada,
-         * mostrar directamente el panel.
-         */
+        document
+            .getElementById("category-select")
+            .addEventListener(
+                "change",
+                actualizarBotonNuevaRonda
+            );
+
+        document
+            .getElementById("secret-word")
+            .addEventListener(
+                "change",
+                actualizarBotonNuevaRonda
+            );
+
+
         if (adminToken) {
             mostrarPanelAdmin();
         }
 
 
-        /*
-         * Actualiza el estado cada segundo.
-         */
         setInterval(
             () => {
                 if (adminToken) {

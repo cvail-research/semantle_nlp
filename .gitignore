@@ -12,3 +12,6 @@ wheels/
 *.vec
 *.pt
 
+.env
+.env.*
+!.env.example

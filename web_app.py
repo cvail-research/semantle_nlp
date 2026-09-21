@@ -6,7 +6,7 @@ import time
 import uuid
 from pathlib import Path
 from typing import Optional
-
+from dotenv import load_dotenv
 from fastapi import (
     Depends,
     FastAPI,
@@ -24,12 +24,7 @@ from game_engine import (
     obtener_categorias,
     validar_palabra_jugable,
 )
-
-
-# ============================================================
-# CONFIGURACIÓN DE CARPETAS
-# ============================================================
-
+load_dotenv()  # Carga las variables de entorno desde el archivo .env
 BASE_DIR = Path(__file__).resolve().parent
 
 STATIC_DIR = BASE_DIR / "static"
@@ -38,10 +33,6 @@ TEMPLATES_DIR = BASE_DIR / "templates"
 STATIC_DIR.mkdir(exist_ok=True)
 TEMPLATES_DIR.mkdir(exist_ok=True)
 
-
-# ============================================================
-# APLICACIÓN FASTAPI
-# ============================================================
 
 app = FastAPI(
     title="Semantle Español Multijugador"
@@ -62,37 +53,32 @@ templates = Jinja2Templates(
 )
 
 
-# ============================================================
-# CONFIGURACIÓN DEL JUEGO
-# ============================================================
-
 MAX_JUGADORES = 10
 MAX_INTENTOS = 5
 
-# Duración de cada ronda.
-# Para probar rápidamente puedes poner 30.
 TIEMPO_PARTIDA_SEGUNDOS = 120
-
-# Cuenta regresiva inicial.
 CUENTA_REGRESIVA_SEGUNDOS = 3
 
 ADMIN_PASSWORD = os.getenv(
     "ADMIN_PASSWORD",
-    "admin123",
+)
+ADMIN_TOKEN = os.getenv(
+    "ADMIN_TOKEN"
 )
 
+if not ADMIN_PASSWORD:
+    raise RuntimeError(
+        "Falta configurar ADMIN_PASSWORD."
+    )
 
-# En esta versión existe una sola sala.
+if not ADMIN_TOKEN:
+    raise RuntimeError(
+        "Falta configurar ADMIN_TOKEN."
+    )
+
 partida_actual = None
-
-# Evita conflictos cuando llegan varias peticiones
-# al mismo tiempo.
 bloqueo = threading.Lock()
 
-
-# ============================================================
-# MODELOS DE PETICIONES
-# ============================================================
 
 class CrearPartidaRequest(BaseModel):
     categoria: str
@@ -113,10 +99,6 @@ class PistaRequest(BaseModel):
     jugador_id: str
 
 
-# ============================================================
-# CLASE PARTIDA
-# ============================================================
-
 class Partida:
     def __init__(
         self,
@@ -132,6 +114,18 @@ class Partida:
 
         self.jugadores = {}
 
+        # Número de ronda actual.
+        self.numero_ronda = 1
+
+        # Historial de los podios anteriores.
+        self.historial_rondas = []
+
+        # Ranking acumulado de todos los jugadores.
+        self.estadisticas_acumuladas = {}
+
+        # Evita guardar dos veces una misma ronda.
+        self.ronda_actual_guardada = False
+
         self.cuenta_regresiva_hasta = None
         self.inicio_juego = None
         self.fin_juego = None
@@ -144,9 +138,6 @@ class Partida:
 
     @staticmethod
     def generar_codigo() -> str:
-        """
-        Genera un código de sala de seis caracteres.
-        """
         return secrets.token_hex(3).upper()
 
     def configurar_ronda(
@@ -155,17 +146,6 @@ class Partida:
         palabra: str,
         reiniciar_jugadores: bool = True,
     ):
-        """
-        Configura una nueva ronda.
-
-        Si reiniciar_jugadores=True:
-        - Conserva los mismos jugadores.
-        - Conserva el mismo código.
-        - Borra los intentos anteriores.
-        - Borra las pistas anteriores.
-        - Borra el podio anterior.
-        """
-
         categoria = categoria.strip()
         palabra = palabra.strip().lower()
 
@@ -214,19 +194,30 @@ class Partida:
         palabra: str,
     ):
         """
-        Cambia la palabra de la sala y conserva:
+        Permite cambiar la palabra:
 
-        - El mismo código.
-        - Los mismos jugadores.
+        - Antes de iniciar una ronda.
+        - Después de finalizar una ronda.
 
-        Reinicia:
-
-        - Intentos.
-        - Pistas.
-        - Tiempo.
-        - Estado.
-        - Podio.
+        No permite cambiarla mientras:
+        - Está iniciando.
+        - Está en curso.
         """
+
+        self.actualizar_estado()
+
+        if self.estado not in (
+            "ESPERANDO_JUGADORES",
+            "FINALIZADA",
+        ):
+            raise ValueError(
+                "No puedes cambiar la palabra mientras "
+                "la partida está en curso."
+            )
+
+        if self.estado == "FINALIZADA":
+            self.guardar_resultado_ronda()
+            self.numero_ronda += 1
 
         self.configurar_ronda(
             categoria=categoria,
@@ -234,15 +225,9 @@ class Partida:
             reiniciar_jugadores=True,
         )
 
+        self.ronda_actual_guardada = False
+
     def actualizar_estado(self):
-        """
-        Cambia automáticamente:
-
-        INICIANDO -> EN_CURSO
-
-        EN_CURSO -> FINALIZADA cuando termina el tiempo.
-        """
-
         ahora = time.monotonic()
 
         if (
@@ -294,12 +279,12 @@ class Partida:
                 "La sala ya tiene 10 jugadores."
             )
 
-        nombres_existentes = [
+        nombres = [
             jugador["nombre"].lower()
             for jugador in self.jugadores.values()
         ]
 
-        if nombre.lower() in nombres_existentes:
+        if nombre.lower() in nombres:
             raise ValueError(
                 "Ya existe un jugador con ese nombre."
             )
@@ -345,14 +330,18 @@ class Partida:
 
     def finalizar(self):
         """
-        Finaliza la ronda actual, pero conserva
-        a los jugadores y el código para una ronda nueva.
+        Finaliza la ronda y guarda sus resultados.
         """
+
+        if self.estado == "FINALIZADA":
+            return
 
         self.estado = "FINALIZADA"
 
         for jugador in self.jugadores.values():
             jugador["terminado"] = True
+
+        self.guardar_resultado_ronda()
 
     def obtener_jugador(
         self,
@@ -414,8 +403,8 @@ class Partida:
 
         if jugador["gano"]:
             raise ValueError(
-                "¡Ya ganaste! Debes esperar "
-                "a que termine la ronda."
+                "¡Ya ganaste! Espera a que termine "
+                "la ronda."
             )
 
         if jugador["terminado"]:
@@ -455,13 +444,6 @@ class Partida:
         elif len(jugador["intentos"]) >= MAX_INTENTOS:
             jugador["terminado"] = True
 
-        # No se finaliza automáticamente cuando
-        # todos los jugadores terminan.
-        #
-        # La ronda solamente termina:
-        # - Cuando se acaba el tiempo.
-        # - Cuando el administrador pulsa terminar.
-
         return resultado
 
     def obtener_pista(
@@ -500,15 +482,6 @@ class Partida:
         )
 
     def obtener_podio(self) -> list[dict]:
-        """
-        Orden del podio:
-
-        1. Jugadores que acertaron.
-        2. Menor cantidad de intentos.
-        3. Menor tiempo.
-        4. Orden alfabético.
-        """
-
         jugadores = list(
             self.jugadores.values()
         )
@@ -526,9 +499,7 @@ class Partida:
                 jugador["nombre"].lower(),
             )
 
-        jugadores.sort(
-            key=criterio
-        )
+        jugadores.sort(key=criterio)
 
         podio = []
 
@@ -541,6 +512,7 @@ class Partida:
             podio.append(
                 {
                     "posicion": posicion,
+                    "jugador_id": jugador["id"],
                     "nombre": jugador["nombre"],
                     "intentos": len(
                         jugador["intentos"]
@@ -556,12 +528,130 @@ class Partida:
 
         return podio
 
+    def guardar_resultado_ronda(self):
+        """
+        Guarda el resultado de la ronda solamente una vez.
+        """
+
+        if self.ronda_actual_guardada:
+            return
+
+        podio = self.obtener_podio()
+
+        self.historial_rondas.append(
+            {
+                "ronda": self.numero_ronda,
+                "categoria": self.categoria,
+                "palabra_secreta": (
+                    self.engine.palabra_secreta
+                ),
+                "podio": podio,
+            }
+        )
+
+        puntos = {
+            1: 3,
+            2: 2,
+            3: 1,
+        }
+
+        # Primero registra a todos los jugadores
+        # que participaron en la ronda.
+        for jugador_id, jugador in (
+            self.jugadores.items()
+        ):
+            if jugador_id not in (
+                self.estadisticas_acumuladas
+            ):
+                self.estadisticas_acumuladas[
+                    jugador_id
+                ] = {
+                    "jugador_id": jugador_id,
+                    "nombre": jugador["nombre"],
+                    "puntos": 0,
+                    "victorias": 0,
+                    "podios": 0,
+                    "rondas_jugadas": 0,
+                    "intentos_totales": 0,
+                }
+
+            estadistica = (
+                self.estadisticas_acumuladas[
+                    jugador_id
+                ]
+            )
+
+            estadistica["nombre"] = (
+                jugador["nombre"]
+            )
+
+            estadistica["rondas_jugadas"] += 1
+
+            estadistica["intentos_totales"] += len(
+                jugador["intentos"]
+            )
+
+        # Después agrega puntos según el podio.
+        for jugador in podio:
+            jugador_id = jugador["jugador_id"]
+
+            estadistica = (
+                self.estadisticas_acumuladas[
+                    jugador_id
+                ]
+            )
+
+            posicion = jugador["posicion"]
+
+            estadistica["puntos"] += puntos.get(
+                posicion,
+                0,
+            )
+
+            estadistica["podios"] += 1
+
+            if posicion == 1 and jugador["gano"]:
+                estadistica["victorias"] += 1
+
+        self.ronda_actual_guardada = True
+
+    def obtener_ranking_acumulado(self) -> list[dict]:
+        ranking = list(
+            self.estadisticas_acumuladas.values()
+        )
+
+        ranking.sort(
+            key=lambda jugador: (
+                -jugador["puntos"],
+                -jugador["victorias"],
+                -jugador["podios"],
+                jugador["intentos_totales"],
+                jugador["nombre"].lower(),
+            )
+        )
+
+        resultado = []
+
+        for posicion, jugador in enumerate(
+            ranking,
+            start=1,
+        ):
+            resultado.append(
+                {
+                    "posicion": posicion,
+                    **jugador,
+                }
+            )
+
+        return resultado
+
     def estado_admin(self) -> dict:
         self.actualizar_estado()
 
         respuesta = {
             "codigo": self.codigo,
             "estado": self.estado,
+            "numero_ronda": self.numero_ronda,
             "categoria": self.categoria,
             "palabra_secreta": (
                 self.engine.palabra_secreta
@@ -592,10 +682,14 @@ class Partida:
                 }
                 for jugador in self.jugadores.values()
             ],
+            "historial_rondas": (
+                self.historial_rondas
+            ),
+            "ranking_acumulado": (
+                self.obtener_ranking_acumulado()
+            ),
         }
 
-        # El podio solamente se entrega
-        # después de finalizar la ronda.
         if self.estado == "FINALIZADA":
             respuesta["podio"] = (
                 self.obtener_podio()
@@ -616,6 +710,7 @@ class Partida:
         respuesta = {
             "codigo": self.codigo,
             "estado": self.estado,
+            "numero_ronda": self.numero_ronda,
             "categoria": self.categoria,
             "nombre": jugador["nombre"],
             "jugadores_conectados": len(
@@ -650,18 +745,14 @@ class Partida:
         if jugador["gano"]:
             respuesta["mensaje"] = (
                 "¡Felicitaciones! Encontraste "
-                "la palabra secreta. Espera a que "
-                "termine la ronda."
+                "la palabra secreta."
             )
 
         elif jugador["terminado"]:
             respuesta["mensaje"] = (
-                "Ya terminaste tus intentos. "
-                "Espera a que termine la ronda."
+                "Ya terminaste tus intentos."
             )
 
-        # El podio solo se envía cuando
-        # la ronda está FINALIZADA.
         if self.estado == "FINALIZADA":
             respuesta["palabra_secreta"] = (
                 self.engine.palabra_secreta
@@ -673,10 +764,6 @@ class Partida:
 
         return respuesta
 
-
-# ============================================================
-# FUNCIONES AUXILIARES
-# ============================================================
 
 def obtener_partida() -> Partida:
     if partida_actual is None:
@@ -695,21 +782,14 @@ def verificar_admin(
         default=None
     ),
 ):
-    if x_admin_token != ADMIN_PASSWORD:
+    if x_admin_token != ADMIN_TOKEN:
         raise HTTPException(
             status_code=401,
-            detail=(
-                "Contraseña de administrador "
-                "incorrecta."
-            ),
+            detail="Sesión de administrador inválida.",
         )
 
     return True
 
-
-# ============================================================
-# PÁGINAS HTML
-# ============================================================
 
 @app.get(
     "/",
@@ -744,10 +824,6 @@ def pagina_jugador(request: Request):
     )
 
 
-# ============================================================
-# AUTENTICACIÓN DEL ADMINISTRADOR
-# ============================================================
-
 @app.post("/api/admin/login")
 def iniciar_sesion_admin(
     password: str,
@@ -759,13 +835,9 @@ def iniciar_sesion_admin(
         )
 
     return {
-        "token": ADMIN_PASSWORD,
+        "token": ADMIN_TOKEN,
     }
 
-
-# ============================================================
-# RUTAS DEL ADMINISTRADOR
-# ============================================================
 
 @app.get("/api/admin/categorias")
 def listar_categorias(
@@ -781,25 +853,13 @@ def crear_partida(
     datos: CrearPartidaRequest,
     _: bool = Depends(verificar_admin),
 ):
-    """
-    Crea una sala completamente nueva.
-
-    Esto genera:
-    - Nuevo código.
-    - Nuevos jugadores vacíos.
-    - Nueva palabra.
-    """
-
     global partida_actual
-
-    categoria = datos.categoria.strip()
-    palabra = datos.palabra.strip().lower()
 
     with bloqueo:
         try:
             partida_actual = Partida(
-                categoria=categoria,
-                palabra=palabra,
+                categoria=datos.categoria,
+                palabra=datos.palabra,
             )
         except ValueError as error:
             raise HTTPException(
@@ -815,32 +875,13 @@ def crear_nueva_ronda(
     datos: CrearPartidaRequest,
     _: bool = Depends(verificar_admin),
 ):
-    """
-    Crea una ronda nueva dentro de la misma sala.
-
-    Conserva:
-    - El mismo código.
-    - Los mismos jugadores.
-
-    Reinicia:
-    - Palabra.
-    - Categoría.
-    - Intentos.
-    - Pistas.
-    - Podio.
-    - Tiempo.
-    """
-
     partida = obtener_partida()
-
-    categoria = datos.categoria.strip()
-    palabra = datos.palabra.strip().lower()
 
     with bloqueo:
         try:
             partida.reiniciar_ronda(
-                categoria=categoria,
-                palabra=palabra,
+                categoria=datos.categoria,
+                palabra=datos.palabra,
             )
         except ValueError as error:
             raise HTTPException(
@@ -889,10 +930,6 @@ def finalizar_partida(
 
     return partida.estado_admin()
 
-
-# ============================================================
-# RUTAS DE LOS JUGADORES
-# ============================================================
 
 @app.post("/api/partida/unirse")
 def unirse_a_partida(

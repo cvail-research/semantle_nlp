@@ -2,10 +2,12 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1.0"
     >
+
     <title>Jugador - Semantle</title>
 
     <link
@@ -13,32 +15,161 @@
         href="/static/style.css"
     >
 </head>
+
 <body>
+    <!-- =====================================================
+         MODAL DE CUENTA REGRESIVA
+    ====================================================== -->
+
+    <div
+        id="countdown-overlay"
+        class="countdown-overlay hidden"
+    >
+        <div class="countdown-card">
+            <div class="countdown-title">
+                La partida comienza en
+            </div>
+
+            <div
+                id="countdown-number"
+                class="countdown-number"
+            >
+                3
+            </div>
+
+            <div class="countdown-subtitle">
+                Prepárate para jugar
+            </div>
+        </div>
+    </div>
+
+
+    <!-- =====================================================
+         MODAL DEL PODIO
+    ====================================================== -->
+
+    <div
+        id="podium-modal"
+        class="podium-modal hidden"
+    >
+        <div
+            class="podium-modal-backdrop"
+            onclick="cerrarPodio()"
+        ></div>
+
+        <section
+            class="podium-modal-card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="podium-title"
+        >
+            <button
+                type="button"
+                class="podium-close"
+                onclick="cerrarPodio()"
+                aria-label="Cerrar podio"
+            >
+                ×
+            </button>
+
+            <div class="podium-trophy">
+                🏆
+            </div>
+
+            <h2 id="podium-title">
+                ¡Partida finalizada!
+            </h2>
+
+            <p class="podium-modal-subtitle">
+                Estos son los tres mejores jugadores
+            </p>
+
+            <div
+                id="podium-modal-content"
+                class="podium-modal-content"
+            ></div>
+
+            <button
+                type="button"
+                class="podium-continue-button"
+                onclick="cerrarPodio()"
+            >
+                Continuar
+            </button>
+        </section>
+    </div>
+
+
+    <!-- =====================================================
+         CONTENIDO PRINCIPAL
+    ====================================================== -->
+
     <main class="container">
-        <h1>Semantle Español</h1>
+        <header class="page-header">
+            <div class="brand">
+                <div class="brand-icon">
+                    🎯
+                </div>
+
+                <div>
+                    <h1>Semantle Español</h1>
+
+                    <p class="subtitle">
+                        Encuentra la palabra más cercana
+                    </p>
+                </div>
+            </div>
+        </header>
+
+
+        <!-- =================================================
+             FORMULARIO PARA UNIRSE
+        ================================================== -->
 
         <section
             id="join-panel"
-            class="card"
+            class="card auth-card"
         >
-            <h2>Unirse a una partida</h2>
+            <div class="panel-title">
+                <div class="panel-title-icon">
+                    🚀
+                </div>
+
+                <h2>Unirse a una sala</h2>
+            </div>
+
+            <label for="game-code-input">
+                Código de la sala
+            </label>
 
             <input
                 id="game-code-input"
                 type="text"
-                placeholder="Código de partida"
+                placeholder="Ejemplo: 278F7E"
                 maxlength="6"
             >
+
+            <label for="player-name">
+                Tu nombre
+            </label>
 
             <input
                 id="player-name"
                 type="text"
-                placeholder="Tu nombre"
+                placeholder="Escribe tu nombre"
                 maxlength="30"
+                onkeydown="
+                    if (event.key === 'Enter') {
+                        unirse();
+                    }
+                "
             >
 
-            <button onclick="unirse()">
-                Unirse
+            <button
+                type="button"
+                onclick="unirse()"
+            >
+                Entrar a la partida
             </button>
 
             <p
@@ -47,117 +178,272 @@
             ></p>
         </section>
 
+
+        <!-- =================================================
+             PANEL DE JUEGO
+        ================================================== -->
+
         <section
             id="game-panel"
-            class="card hidden"
+            class="hidden"
         >
-            <h2>
-                Partida:
-                <span id="game-code">-</span>
-            </h2>
+            <!-- Información superior -->
+            <div class="card">
+                <div class="panel-title">
+                    <div class="panel-title-icon">
+                        🎮
+                    </div>
 
-            <p>
-                Jugador:
-                <strong id="player-display">-</strong>
-            </p>
-
-            <p>
-                Categoría:
-                <strong id="category-display">-</strong>
-            </p>
-
-            <p>
-                Estado:
-                <strong id="game-status">-</strong>
-            </p>
-
-            <p>
-                Jugadores:
-                <strong id="connected-players">
-                    0/10
-                </strong>
-            </p>
-
-            <p>
-                Tiempo:
-                <strong id="time-display">-</strong>
-            </p>
-
-            <p>
-                Intentos restantes:
-                <strong id="attempts-left">
-                    5
-                </strong>
-            </p>
-
-            <div
-                id="waiting-message"
-                class="message"
-            >
-                Esperando a que el administrador
-                inicie la partida.
-            </div>
-
-            <div
-                id="playing-controls"
-                class="hidden"
-            >
-                <div class="input-row">
-                    <input
-                        id="guess-input"
-                        type="text"
-                        placeholder="Escribe una palabra"
-                        onkeydown="if(event.key === 'Enter') enviarIntento()"
-                    >
-
-                    <button
-                        id="guess-button"
-                        onclick="enviarIntento()"
-                    >
-                        Probar
-                    </button>
+                    <h2>
+                        Sala
+                        <span id="game-code">-</span>
+                    </h2>
                 </div>
 
-                <button
-                    id="hint-button"
-                    onclick="pedirPista()"
-                    class="secondary"
+                <div class="game-info-grid">
+                    <div class="info-item">
+                        <span class="info-label">
+                            Jugador
+                        </span>
+
+                        <strong
+                            id="player-display"
+                            class="info-value"
+                        >
+                            -
+                        </strong>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="info-label">
+                            Categoría
+                        </span>
+
+                        <strong
+                            id="category-display"
+                            class="info-value"
+                        >
+                            -
+                        </strong>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="info-label">
+                            Estado
+                        </span>
+
+                        <strong
+                            id="game-status"
+                            class="info-value"
+                        >
+                            -
+                        </strong>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="info-label">
+                            Tiempo
+                        </span>
+
+                        <strong
+                            id="time-display"
+                            class="info-value"
+                        >
+                            -
+                        </strong>
+                    </div>
+                </div>
+
+                <div
+                    id="waiting-message"
+                    class="waiting-panel"
                 >
-                    Pedir pista
-                </button>
+                    <div class="waiting-icon">
+                        ⏳
+                    </div>
 
-                <p
-                    id="game-message"
-                    class="message"
-                ></p>
-
-                <h3>Mis intentos</h3>
-
-                <table>
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Palabra</th>
-                            <th>Similitud</th>
-                            <th>Ranking</th>
-                        </tr>
-                    </thead>
-
-                    <tbody id="attempts-table"></tbody>
-                </table>
+                    <p>
+                        Esperando al administrador.
+                    </p>
+                </div>
             </div>
 
+
+            <!-- =================================================
+                 ZONA PRINCIPAL DEL JUEGO E INTENTOS
+            ================================================== -->
+
+            <div class="card play-card">
+                <div class="play-card-header">
+                    <div>
+                        <span class="section-kicker">
+                            DESAFÍO ACTUAL
+                        </span>
+
+                        <h2>
+                            Escribe una palabra
+                        </h2>
+                    </div>
+
+                    <div class="attempts-counter">
+                        <span>
+                            Intentos
+                        </span>
+
+                        <strong
+                            id="attempts-left"
+                        >
+                            5
+                        </strong>
+                    </div>
+                </div>
+
+
+                <div
+                    id="playing-controls"
+                    class="hidden"
+                >
+                    <div class="guess-area">
+                        <input
+                            id="guess-input"
+                            type="text"
+                            placeholder="Escribe una palabra"
+                            onkeydown="
+                                if (event.key === 'Enter') {
+                                    enviarIntento();
+                                }
+                            "
+                        >
+
+                        <button
+                            id="guess-button"
+                            type="button"
+                            onclick="enviarIntento()"
+                        >
+                            Probar
+                        </button>
+                    </div>
+
+                    <div class="game-actions">
+                        <button
+                            id="hint-button"
+                            type="button"
+                            class="secondary"
+                            onclick="pedirPista()"
+                        >
+                            💡 Pedir pista
+                        </button>
+                    </div>
+
+                    <p
+                        id="game-message"
+                        class="message"
+                    ></p>
+                </div>
+
+
+                <!-- Los intentos están inmediatamente
+                     debajo del campo de juego -->
+                <div class="attempts-section">
+                    <div class="attempts-title">
+                        <div>
+                            <span class="section-kicker">
+                                HISTORIAL
+                            </span>
+
+                            <h2>
+                                Mis intentos
+                            </h2>
+                        </div>
+
+                        <span
+                            id="attempts-label"
+                            class="attempts-count"
+                        >
+                            0 intentos
+                        </span>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Palabra</th>
+                                    <th>Similitud</th>
+                                    <th>Ranking</th>
+                                </tr>
+                            </thead>
+
+                            <tbody
+                                id="attempts-table"
+                            ></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- =================================================
+                 PROGRESO DEL JUGADOR
+            ================================================== -->
+
+            <div class="card progress-card">
+                <div class="panel-title">
+                    <div class="panel-title-icon">
+                        📊
+                    </div>
+
+                    <h2>Tu progreso</h2>
+                </div>
+
+                <div class="progress-grid">
+                    <div class="info-item">
+                        <span class="info-label">
+                            Jugadores conectados
+                        </span>
+
+                        <strong
+                            id="connected-players"
+                            class="info-value"
+                        >
+                            0/10
+                        </strong>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="info-label">
+                            Intentos restantes
+                        </span>
+
+                        <strong
+                            id="attempts-left-secondary"
+                            class="info-value"
+                        >
+                            5
+                        </strong>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Podio inferior de respaldo -->
             <div
                 id="podium-container"
-                class="podium"
+                class="podium hidden"
             ></div>
         </section>
     </main>
+
 
     <script>
         let playerId = localStorage.getItem(
             "player_id"
         );
+
+        let podioMostrado = false;
+        let ultimaCuentaRegresiva = null;
+
 
         function mostrarJuego() {
             document
@@ -170,92 +456,110 @@
 
             cargarEstado();
         }
-
         function volverAUnirse(mensaje) {
-            localStorage.removeItem(
-                "player_id"
-            );
-
+            localStorage.removeItem("player_id");
             playerId = null;
 
-            document
-                .getElementById("game-panel")
-                .classList.add("hidden");
+            document.getElementById("game-panel").classList.add("hidden");
+            document.getElementById("join-panel").classList.remove("hidden");
 
-            document
-                .getElementById("join-panel")
-                .classList.remove("hidden");
-
-            document
-                .getElementById("join-message")
-                .textContent =
-                mensaje ||
-                "Únete a una partida nueva.";
+            if (mensaje) {
+                document.getElementById("join-message").textContent = mensaje;
+            }
         }
+
 
         async function unirse() {
             const codigo = document
-                .getElementById("game-code-input")
+                .getElementById(
+                    "game-code-input"
+                )
                 .value
                 .trim()
                 .toUpperCase();
 
             const nombre = document
-                .getElementById("player-name")
+                .getElementById(
+                    "player-name"
+                )
                 .value
                 .trim();
 
+            const mensaje = document
+                .getElementById(
+                    "join-message"
+                );
+
             if (!codigo || !nombre) {
-                document
-                    .getElementById("join-message")
-                    .textContent =
-                    "Escribe código y nombre.";
+                mensaje.textContent =
+                    "Escribe el código y tu nombre.";
 
                 return;
             }
 
-            const respuesta = await fetch(
-                "/api/partida/unirse",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
-                    body: JSON.stringify({
-                        codigo: codigo,
-                        nombre: nombre
-                    })
+            mensaje.textContent =
+                "Conectando a la sala...";
+
+            try {
+                const respuesta = await fetch(
+                    "/api/partida/unirse",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            codigo: codigo,
+                            nombre: nombre
+                        })
+                    }
+                );
+
+                const datos =
+                    await respuesta.json();
+
+                if (!respuesta.ok) {
+                    mensaje.textContent =
+                        datos.detail ||
+                        "No se pudo unir a la sala.";
+
+                    return;
                 }
-            );
 
-            const datos = await respuesta.json();
+                playerId =
+                    datos.jugador_id;
 
-            if (!respuesta.ok) {
+                localStorage.setItem(
+                    "player_id",
+                    playerId
+                );
+
                 document
-                    .getElementById("join-message")
-                    .textContent = datos.detail;
+                    .getElementById(
+                        "game-code"
+                    )
+                    .textContent =
+                    datos.codigo;
 
-                return;
+                document
+                    .getElementById(
+                        "player-display"
+                    )
+                    .textContent =
+                    datos.nombre;
+
+                mostrarJuego();
+            } catch (error) {
+                console.error(error);
+
+                mensaje.textContent =
+                    "No se pudo conectar con el servidor.";
             }
-
-            playerId = datos.jugador_id;
-
-            localStorage.setItem(
-                "player_id",
-                playerId
-            );
-
-            document
-                .getElementById("game-code")
-                .textContent = datos.codigo;
-
-            document
-                .getElementById("player-display")
-                .textContent = datos.nombre;
-
-            mostrarJuego();
         }
+
 
         async function cargarEstado() {
             if (!playerId) {
@@ -268,301 +572,773 @@
                     encodeURIComponent(playerId)
                 );
 
+                if (respuesta.status === 404) {
+                    volverAUnirse(
+                        "Tu sesión anterior ya no es válida. Ingresa el código de la sala nuevamente."
+                    );
+                    return;
+                }
+
                 const datos = await respuesta.json();
 
                 if (!respuesta.ok) {
-                    if (respuesta.status === 404) {
-                        volverAUnirse(
-                            "La partida anterior terminó. " +
-                            "Únete a la nueva partida."
-                        );
-                    } else {
-                        document
-                            .getElementById("game-message")
-                            .textContent =
-                            datos.detail;
+                    const mensaje = document.getElementById("game-message");
+                    if (mensaje) {
+                        mensaje.textContent =
+                            datos.detail || "No se pudo consultar la sala.";
                     }
-
                     return;
                 }
 
                 mostrarEstado(datos);
             } catch (error) {
-                document
-                    .getElementById("game-message")
-                    .textContent =
-                    "No se pudo consultar la partida.";
+                console.error(error);
+
+                const mensaje = document.getElementById("game-message");
+                if (mensaje) {
+                    mensaje.textContent = "No se pudo conectar con el servidor.";
+                }
             }
         }
 
+
+        function mostrarCuentaRegresiva(
+            numero
+        ) {
+            const overlay =
+                document.getElementById(
+                    "countdown-overlay"
+                );
+
+            const elemento =
+                document.getElementById(
+                    "countdown-number"
+                );
+
+            if (!overlay || !elemento) {
+                return;
+            }
+
+            if (!numero || numero <= 0) {
+                overlay.classList.add(
+                    "hidden"
+                );
+
+                ultimaCuentaRegresiva = null;
+
+                return;
+            }
+
+            if (
+                ultimaCuentaRegresiva === numero
+            ) {
+                return;
+            }
+
+            ultimaCuentaRegresiva = numero;
+
+            elemento.textContent =
+                numero;
+
+            elemento.classList.remove(
+                "countdown-3",
+                "countdown-2",
+                "countdown-1"
+            );
+
+            elemento.classList.add(
+                "countdown-" + numero
+            );
+
+            overlay.classList.remove(
+                "hidden"
+            );
+
+            elemento.style.animation =
+                "none";
+
+            void elemento.offsetWidth;
+
+            elemento.style.animation =
+                "countdown-pop 0.85s ease-in-out";
+        }
+
+
+        function cerrarPodio() {
+            const modal =
+                document.getElementById(
+                    "podium-modal"
+                );
+
+            if (!modal) {
+                return;
+            }
+
+            modal.classList.add(
+                "hidden"
+            );
+
+            document.body.classList.remove(
+                "modal-open"
+            );
+        }
+
+
+        function reiniciarPodioVisual() {
+            podioMostrado = false;
+
+            cerrarPodio();
+
+            const contenedor =
+                document.getElementById(
+                    "podium-container"
+                );
+
+            if (contenedor) {
+                contenedor.innerHTML = "";
+
+                contenedor.classList.add(
+                    "hidden"
+                );
+            }
+        }
+
+
+        function mostrarPodioEmergente(
+            podio
+        ) {
+            const modal =
+                document.getElementById(
+                    "podium-modal"
+                );
+
+            const contenido =
+                document.getElementById(
+                    "podium-modal-content"
+                );
+
+            if (!modal || !contenido) {
+                return;
+            }
+
+            const primeros =
+                (podio || []).slice(0, 3);
+
+            if (!primeros.length) {
+                contenido.innerHTML = `
+                    <div class="podium-empty">
+                        No hay resultados disponibles.
+                    </div>
+                `;
+
+                modal.classList.remove(
+                    "hidden"
+                );
+
+                document.body.classList.add(
+                    "modal-open"
+                );
+
+                return;
+            }
+
+            contenido.innerHTML =
+                primeros.map(
+                    (jugador, indice) => {
+                        const posicion =
+                            indice + 1;
+
+                        let medalla = "🏅";
+
+                        if (posicion === 1) {
+                            medalla = "🥇";
+                        } else if (
+                            posicion === 2
+                        ) {
+                            medalla = "🥈";
+                        } else if (
+                            posicion === 3
+                        ) {
+                            medalla = "🥉";
+                        }
+
+                        const tiempo =
+                            jugador
+                                .tiempo_segundos !==
+                                null &&
+                            jugador
+                                .tiempo_segundos !==
+                                undefined
+                                ? jugador
+                                    .tiempo_segundos +
+                                  " segundos"
+                                : "No acertó";
+
+                        const resultado =
+                            jugador.gano
+                                ? "Palabra encontrada"
+                                : "No encontró la palabra";
+
+                        return `
+                            <article
+                                class="
+                                    podium-place
+                                    podium-place-${posicion}
+                                "
+                            >
+                                <div
+                                    class="podium-medal"
+                                >
+                                    ${medalla}
+                                </div>
+
+                                <div
+                                    class="podium-position"
+                                >
+                                    ${posicion}° lugar
+                                </div>
+
+                                <div
+                                    class="
+                                        podium-player-name
+                                    "
+                                >
+                                    ${jugador.nombre}
+                                </div>
+
+                                <div
+                                    class="
+                                        podium-player-info
+                                    "
+                                >
+                                    ${jugador.intentos}
+                                    intento(s)
+                                </div>
+
+                                <div
+                                    class="
+                                        podium-player-time
+                                    "
+                                >
+                                    ${tiempo}
+                                </div>
+
+                                <div
+                                    class="
+                                        podium-player-result
+                                    "
+                                >
+                                    ${resultado}
+                                </div>
+                            </article>
+                        `;
+                    }
+                ).join("");
+
+            modal.classList.remove(
+                "hidden"
+            );
+
+            document.body.classList.add(
+                "modal-open"
+            );
+        }
+
+
         function mostrarEstado(datos) {
-            document
-                .getElementById("game-code")
-                .textContent = datos.codigo;
+            if (
+                datos.estado ===
+                "INICIANDO"
+            ) {
+                mostrarCuentaRegresiva(
+                    datos.cuenta_regresiva
+                );
+            } else {
+                mostrarCuentaRegresiva(0);
+            }
+
+
+            if (
+                datos.estado ===
+                "ESPERANDO_JUGADORES" &&
+                Array.isArray(datos.intentos) &&
+                datos.intentos.length === 0
+            ) {
+                reiniciarPodioVisual();
+            }
+
 
             document
-                .getElementById("player-display")
-                .textContent = datos.nombre;
+                .getElementById(
+                    "game-code"
+                )
+                .textContent =
+                datos.codigo || "-";
 
             document
-                .getElementById("category-display")
+                .getElementById(
+                    "player-display"
+                )
+                .textContent =
+                datos.nombre || "-";
+
+            document
+                .getElementById(
+                    "category-display"
+                )
                 .textContent =
                 datos.categoria || "-";
 
-            document
-                .getElementById("game-status")
-                .textContent = datos.estado;
+            const estado =
+                document.getElementById(
+                    "game-status"
+                );
+
+            estado.textContent =
+                datos.estado || "-";
+
+            estado.className =
+                "info-value " +
+                obtenerClaseEstado(
+                    datos.estado
+                );
 
             document
-                .getElementById("connected-players")
+                .getElementById(
+                    "connected-players"
+                )
                 .textContent =
                 `${datos.jugadores_conectados}/` +
                 `${datos.max_jugadores}`;
 
             document
-                .getElementById("attempts-left")
+                .getElementById(
+                    "attempts-left"
+                )
                 .textContent =
                 datos.intentos_restantes;
 
-            const timeDisplay = document
-                .getElementById("time-display");
+            document
+                .getElementById(
+                    "attempts-left-secondary"
+                )
+                .textContent =
+                datos.intentos_restantes;
 
-            const waitingMessage = document
-                .getElementById("waiting-message");
 
-            const controls = document
-                .getElementById("playing-controls");
+            const tiempo =
+                document.getElementById(
+                    "time-display"
+                );
 
-            const input = document
-                .getElementById("guess-input");
+            const espera =
+                document.getElementById(
+                    "waiting-message"
+                );
 
-            const guessButton = document
-                .getElementById("guess-button");
+            const controles =
+                document.getElementById(
+                    "playing-controls"
+                );
 
-            const hintButton = document
-                .getElementById("hint-button");
+            const entrada =
+                document.getElementById(
+                    "guess-input"
+                );
+
+            const botonProbar =
+                document.getElementById(
+                    "guess-button"
+                );
+
+            const botonPista =
+                document.getElementById(
+                    "hint-button"
+                );
+
+            const mensaje =
+                document.getElementById(
+                    "game-message"
+                );
+
 
             if (
                 datos.estado ===
                 "ESPERANDO_JUGADORES"
             ) {
-                timeDisplay.textContent =
+                tiempo.textContent =
                     "Esperando inicio";
 
-                waitingMessage.textContent =
-                    "Esperando a que el administrador " +
-                    "inicie la partida.";
+                espera.innerHTML = `
+                    <div class="waiting-icon">
+                        ⏳
+                    </div>
 
-                waitingMessage.classList.remove(
+                    <p>
+                        Esperando a que el administrador
+                        inicie la ronda.
+                    </p>
+                `;
+
+                espera.classList.remove(
                     "hidden"
                 );
 
-                controls.classList.add(
+                controles.classList.add(
                     "hidden"
                 );
 
-                input.disabled = true;
-                guessButton.disabled = true;
-                hintButton.disabled = true;
+                entrada.disabled = true;
+                botonProbar.disabled = true;
+                botonPista.disabled = true;
             } else if (
-                datos.estado === "INICIANDO"
+                datos.estado ===
+                "INICIANDO"
             ) {
-                timeDisplay.textContent =
-                    `Iniciando en ` +
-                    `${datos.cuenta_regresiva}...`;
+                tiempo.textContent =
+                    "Iniciando en " +
+                    datos.cuenta_regresiva +
+                    "...";
 
-                waitingMessage.textContent =
-                    `La partida comienza en ` +
-                    `${datos.cuenta_regresiva}...`;
+                espera.innerHTML = `
+                    <div class="waiting-icon">
+                        🚀
+                    </div>
 
-                waitingMessage.classList.remove(
+                    <p>
+                        La ronda comienza en
+                        ${datos.cuenta_regresiva}...
+                    </p>
+                `;
+
+                espera.classList.remove(
                     "hidden"
                 );
 
-                controls.classList.add(
+                controles.classList.add(
                     "hidden"
                 );
 
-                input.disabled = true;
-                guessButton.disabled = true;
-                hintButton.disabled = true;
+                entrada.disabled = true;
+                botonProbar.disabled = true;
+                botonPista.disabled = true;
             } else if (
-                datos.estado === "EN_CURSO" &&
+                datos.estado ===
+                "EN_CURSO" &&
                 !datos.gano &&
                 !datos.terminado
             ) {
-                timeDisplay.textContent =
-                    `${datos.segundos_restantes} segundos`;
+                tiempo.textContent =
+                    datos.segundos_restantes +
+                    " segundos";
 
-                waitingMessage.classList.add(
+                espera.classList.add(
                     "hidden"
                 );
 
-                controls.classList.remove(
+                controles.classList.remove(
                     "hidden"
                 );
 
-                input.disabled = false;
-                guessButton.disabled = false;
-                hintButton.disabled = false;
+                entrada.disabled = false;
+                botonProbar.disabled = false;
+                botonPista.disabled = false;
             } else if (
                 datos.gano &&
-                datos.estado === "EN_CURSO"
+                datos.estado ===
+                "EN_CURSO"
             ) {
-                timeDisplay.textContent =
-                    `${datos.segundos_restantes} segundos`;
+                tiempo.textContent =
+                    datos.segundos_restantes +
+                    " segundos";
 
-                waitingMessage.textContent =
-                    "¡Felicitaciones! Ganaste. " +
-                    "Espera a que el administrador " +
-                    "termine la partida.";
+                espera.innerHTML = `
+                    <div class="waiting-icon">
+                        🎉
+                    </div>
 
-                waitingMessage.classList.remove(
+                    <p>
+                        ¡Felicitaciones! Ganaste.
+                        Espera a que termine la ronda.
+                    </p>
+                `;
+
+                espera.classList.remove(
                     "hidden"
                 );
 
-                controls.classList.remove(
+                controles.classList.remove(
                     "hidden"
                 );
 
-                input.disabled = true;
-                guessButton.disabled = true;
-                hintButton.disabled = true;
+                entrada.disabled = true;
+                botonProbar.disabled = true;
+                botonPista.disabled = true;
+
+                mensaje.textContent =
+                    "Encontraste la palabra secreta.";
             } else if (
-                datos.estado === "FINALIZADA"
+                datos.estado ===
+                "FINALIZADA"
             ) {
-                timeDisplay.textContent =
+                tiempo.textContent =
                     "Finalizada";
 
-                waitingMessage.textContent =
-                    "La partida terminó. " +
-                    "Este es el podio final.";
+                espera.innerHTML = `
+                    <div class="waiting-icon">
+                        🏆
+                    </div>
 
-                waitingMessage.classList.remove(
+                    <p>
+                        La ronda terminó.
+                        Revisa el podio final.
+                    </p>
+                `;
+
+                espera.classList.remove(
                     "hidden"
                 );
 
-                controls.classList.remove(
+                controles.classList.remove(
                     "hidden"
                 );
 
-                input.disabled = true;
-                guessButton.disabled = true;
-                hintButton.disabled = true;
+                entrada.disabled = true;
+                botonProbar.disabled = true;
+                botonPista.disabled = true;
 
-                document
-                    .getElementById("game-message")
-                    .textContent =
+                mensaje.textContent =
                     "La palabra era: " +
                     datos.palabra_secreta;
 
-                if (datos.podio) {
-                    mostrarPodio(datos.podio);
+                if (
+                    datos.podio &&
+                    !podioMostrado
+                ) {
+                    podioMostrado = true;
+
+                    mostrarPodioEmergente(
+                        datos.podio
+                    );
+
+                    mostrarPodio(
+                        datos.podio
+                    );
                 }
             } else {
-                timeDisplay.textContent =
-                    "Finalizado";
+                tiempo.textContent =
+                    "Ronda terminada";
 
-                waitingMessage.textContent =
-                    "Ya terminaste tu participación. " +
-                    "Espera a que termine la partida.";
+                espera.innerHTML = `
+                    <div class="waiting-icon">
+                        ⏳
+                    </div>
 
-                waitingMessage.classList.remove(
+                    <p>
+                        Ya terminaste.
+                        Espera la siguiente ronda.
+                    </p>
+                `;
+
+                espera.classList.remove(
                     "hidden"
                 );
 
-                controls.classList.remove(
+                controles.classList.remove(
                     "hidden"
                 );
 
-                input.disabled = true;
-                guessButton.disabled = true;
-                hintButton.disabled = true;
+                entrada.disabled = true;
+                botonProbar.disabled = true;
+                botonPista.disabled = true;
             }
 
             if (datos.gano) {
-                document
-                    .getElementById("game-message")
-                    .textContent =
-                    "¡Felicitaciones! Ganaste. " +
-                    "Ahora espera a los demás jugadores.";
+                mensaje.textContent =
+                    "¡Felicitaciones! Ganaste.";
             }
 
-            mostrarIntentos(datos.intentos);
+            mostrarIntentos(
+                datos.intentos || []
+            );
 
-            // Nunca mostrar podio antes de FINALIZADA.
-            if (datos.estado !== "FINALIZADA") {
-                document
-                    .getElementById("podium-container")
-                    .innerHTML = "";
+            if (
+                datos.estado !==
+                "FINALIZADA"
+            ) {
+                const podio =
+                    document.getElementById(
+                        "podium-container"
+                    );
+
+                podio.innerHTML = "";
+
+                podio.classList.add(
+                    "hidden"
+                );
             }
         }
 
-        function mostrarIntentos(intentos) {
-            const tabla = document
-                .getElementById("attempts-table");
+
+        function obtenerClaseEstado(
+            estado
+        ) {
+            if (estado === "INICIANDO") {
+                return "status-starting";
+            }
+
+            if (estado === "EN_CURSO") {
+                return "status-playing";
+            }
+
+            if (estado === "FINALIZADA") {
+                return "status-finished";
+            }
+
+            return "status-waiting";
+        }
+
+
+        function mostrarIntentos(
+            intentos
+        ) {
+            const tabla =
+                document.getElementById(
+                    "attempts-table"
+                );
+
+            const etiqueta =
+                document.getElementById(
+                    "attempts-label"
+                );
 
             tabla.innerHTML = "";
 
-            for (const intento of intentos) {
+            etiqueta.textContent =
+                intentos.length +
+                " intento(s) registrados";
+
+            if (!intentos.length) {
+                tabla.innerHTML = `
+                    <tr>
+                        <td colspan="4">
+                            Todavía no tienes intentos.
+                        </td>
+                    </tr>
+                `;
+
+                return;
+            }
+
+            for (
+                const intento of intentos
+            ) {
                 const fila =
-                    document.createElement("tr");
+                    document.createElement(
+                        "tr"
+                    );
 
                 fila.innerHTML = `
-                    <td>${intento.numero_intento}</td>
-                    <td style="color:${intento.color}">
+                    <td>
+                        ${intento.numero_intento}
+                    </td>
+
+                    <td
+                        style="
+                            color: ${intento.color};
+                            font-weight: 800;
+                        "
+                    >
                         ${intento.palabra}
                     </td>
-                    <td>${intento.similitud}</td>
-                    <td>#${intento.puesto}</td>
+
+                    <td>
+                        ${intento.similitud}
+                    </td>
+
+                    <td>
+                        #${intento.puesto}
+                    </td>
                 `;
 
                 tabla.appendChild(fila);
             }
         }
 
-        function mostrarPodio(podio) {
-            const contenedor = document
-                .getElementById("podium-container");
 
-            contenedor.innerHTML = `
-                <h2>🏆 Podio final</h2>
-                <ol>
-                    ${podio.map(jugador => `
-                        <li>
-                            <strong>
-                                ${jugador.nombre}
-                            </strong>
-                            -
-                            ${jugador.intentos}
-                            intento(s)
-                            ${
-                                jugador.gano
-                                    ? " ✅"
-                                    : " ❌"
-                            }
-                            ${
-                                jugador.tiempo_segundos !== null
-                                    ? " - " +
-                                      jugador.tiempo_segundos +
-                                      " segundos"
-                                    : ""
-                            }
-                        </li>
-                    `).join("")}
-                </ol>
-            `;
-        }
+        function mostrarPodio(
+            podio
+        ) {
+            const contenedor =
+                document.getElementById(
+                    "podium-container"
+                );
 
-        async function enviarIntento() {
-            const input = document
-                .getElementById("guess-input");
+            if (!podio || !podio.length) {
+                contenedor.innerHTML = "";
 
-            if (input.disabled) {
+                contenedor.classList.add(
+                    "hidden"
+                );
+
                 return;
             }
 
-            const palabra = input.value.trim();
+            contenedor.innerHTML = `
+                <h2>🏆 Podio final</h2>
+
+                <ol>
+                    ${
+                        podio.slice(0, 3)
+                            .map(
+                                jugador => `
+                                    <li>
+                                        <strong>
+                                            ${jugador.nombre}
+                                        </strong>
+
+                                        — ${jugador.intentos}
+                                        intento(s)
+
+                                        ${
+                                            jugador.gano
+                                                ? " ✅"
+                                                : " ❌"
+                                        }
+
+                                        ${
+                                            jugador.tiempo_segundos !== null
+                                                ? " — " +
+                                                  jugador.tiempo_segundos +
+                                                  " segundos"
+                                                : ""
+                                        }
+                                    </li>
+                                `
+                            )
+                            .join("")
+                    }
+                </ol>
+            `;
+
+            contenedor.classList.remove(
+                "hidden"
+            );
+        }
+
+
+        async function enviarIntento() {
+            const entrada =
+                document.getElementById(
+                    "guess-input"
+                );
+
+            if (entrada.disabled) {
+                return;
+            }
+
+            const palabra =
+                entrada.value.trim();
 
             if (!palabra) {
                 return;
@@ -572,10 +1348,12 @@
                 "/api/partida/intento",
                 {
                     method: "POST",
+
                     headers: {
                         "Content-Type":
                             "application/json"
                     },
+
                     body: JSON.stringify({
                         jugador_id: playerId,
                         palabra: palabra
@@ -583,83 +1361,83 @@
                 }
             );
 
-            const datos = await respuesta.json();
+            const datos =
+                await respuesta.json();
+
+            const mensaje =
+                document.getElementById(
+                    "game-message"
+                );
 
             if (!respuesta.ok) {
-                document
-                    .getElementById("game-message")
-                    .textContent = datos.detail;
-
-                if (
-                    datos.detail.includes(
-                        "Ya ganaste"
-                    )
-                ) {
-                    input.disabled = true;
-
-                    document
-                        .getElementById("guess-button")
-                        .disabled = true;
-
-                    document
-                        .getElementById("hint-button")
-                        .disabled = true;
-                }
+                mensaje.textContent =
+                    datos.detail ||
+                    "No se pudo registrar el intento.";
 
                 return;
             }
 
-            input.value = "";
+            entrada.value = "";
 
             if (datos.es_correcta) {
-                document
-                    .getElementById("game-message")
-                    .textContent =
+                mensaje.textContent =
                     "¡Felicitaciones! Ganaste. " +
-                    "Espera a los demás jugadores.";
+                    "Espera a que termine la ronda.";
             } else {
-                document
-                    .getElementById("game-message")
-                    .textContent =
-                    `Tu palabra quedó en el ` +
-                    `puesto #${datos.puesto}.`;
+                mensaje.textContent =
+                    "Tu palabra quedó en el puesto #" +
+                    datos.puesto +
+                    ".";
             }
 
             cargarEstado();
         }
+
 
         async function pedirPista() {
             const respuesta = await fetch(
                 "/api/partida/pista",
                 {
                     method: "POST",
+
                     headers: {
                         "Content-Type":
                             "application/json"
                     },
+
                     body: JSON.stringify({
                         jugador_id: playerId
                     })
                 }
             );
 
-            const datos = await respuesta.json();
+            const datos =
+                await respuesta.json();
 
             document
-                .getElementById("game-message")
+                .getElementById(
+                    "game-message"
+                )
                 .textContent =
-                datos.pista || datos.detail;
+                datos.pista ||
+                datos.detail ||
+                "No se pudo obtener la pista.";
         }
+
 
         if (playerId) {
             mostrarJuego();
         }
 
-        setInterval(() => {
-            if (playerId) {
-                cargarEstado();
-            }
-        }, 1000);
+
+        setInterval(
+            () => {
+                if (playerId) {
+                    cargarEstado();
+                }
+            },
+            1000
+        );
     </script>
 </body>
 </html>

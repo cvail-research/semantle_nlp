@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: semantle-espanol
+    runtime: python
+    plan: free
+
+    buildCommand: uv sync --frozen --no-dev
+
+    startCommand: uv run uvicorn web_app:app --host 0.0.0.0 --port $PORT
+
+    healthCheckPath: /
+
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.14.3
+
+      - key: ADMIN_PASSWORD
+        sync: false
+
+      - key: ADMIN_TOKEN
+        sync: false
