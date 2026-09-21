@@ -342,8 +342,43 @@
                 </div>
 
 
+                <!-- Gráfico / Mapa de cercanía semántica -->
+                <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid rgba(164, 213, 255, 0.15);">
+                    <div class="attempts-title" style="margin-bottom: 10px;">
+                        <div>
+                            <span class="section-kicker">MAPA SEMÁNTICO</span>
+                            <h2>Gráfico de cercanía</h2>
+                        </div>
+                    </div>
+                    <p class="subtitle" style="margin-bottom: 15px; font-size: 13px;">
+                        La palabra secreta se encuentra en el núcleo central (🎯). Las palabras más cercanas aparecen cerca del centro y las lejanas hacia el exterior según su distancia semántica.
+                    </p>
+
+                    <div style="position: relative; width: 100%; aspect-ratio: 1; max-width: 440px; margin: 0 auto; background: rgba(8, 18, 32, 0.75); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                        <svg id="semantic-svg" viewBox="-1.1 -1.1 2.2 2.2" style="width: 100%; height: 100%;">
+                            <!-- Anillos guía de distancia -->
+                            <circle cx="0" cy="0" r="1.0" fill="none" stroke="rgba(164, 213, 255, 0.1)" stroke-width="0.02" />
+                            <circle cx="0" cy="0" r="0.75" fill="none" stroke="rgba(164, 213, 255, 0.08)" stroke-width="0.015" stroke-dasharray="0.03" />
+                            <circle cx="0" cy="0" r="0.5" fill="none" stroke="rgba(164, 213, 255, 0.12)" stroke-width="0.02" />
+                            <circle cx="0" cy="0" r="0.25" fill="none" stroke="rgba(164, 213, 255, 0.08)" stroke-width="0.015" stroke-dasharray="0.03" />
+                            
+                            <!-- Ejes de referencia -->
+                            <line x1="-1" y1="0" x2="1" y2="0" stroke="rgba(164, 213, 255, 0.08)" stroke-width="0.01" />
+                            <line x1="0" y1="-1" x2="0" y2="1" stroke="rgba(164, 213, 255, 0.08)" stroke-width="0.01" />
+
+                            <!-- Centro / Palabra secreta -->
+                            <circle cx="0" cy="0" r="0.065" fill="var(--cyan)" />
+                            <text x="0" y="-0.09" text-anchor="middle" fill="var(--cyan-light)" font-size="0.085" font-weight="bold">🎯 Objetivo</text>
+
+                            <!-- Grupo dinámico donde se pintarán los intentos -->
+                            <g id="svg-attempts"></g>
+                        </svg>
+                    </div>
+                </div>
+
+
                 <!-- Los intentos están inmediatamente
-                     debajo del campo de juego -->
+                     debajo del gráfico -->
                 <div class="attempts-section">
                     <div class="attempts-title">
                         <div>
@@ -456,6 +491,7 @@
 
             cargarEstado();
         }
+
         function volverAUnirse(mensaje) {
             localStorage.removeItem("player_id");
             playerId = null;
@@ -1199,6 +1235,55 @@
         }
 
 
+        function actualizarGrafico(intentos) {
+            const svgGrupo = document.getElementById("svg-attempts");
+            if (!svgGrupo) return;
+
+            svgGrupo.innerHTML = "";
+
+            if (!intentos || !intentos.length) return;
+
+            intentos.forEach(intento => {
+                const x = intento.x !== undefined ? intento.x : 0;
+                const y = intento.y !== undefined ? intento.y : 0;
+                const color = intento.color || "#55d6ff";
+                const palabra = intento.palabra || "";
+                const puesto = intento.puesto || "";
+                const similitud = intento.similitud || 0;
+
+                const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+
+                // Círculo del intento
+                const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                circle.setAttribute("cx", x);
+                circle.setAttribute("cy", y);
+                circle.setAttribute("r", "0.045");
+                circle.setAttribute("fill", color);
+                circle.setAttribute("stroke", "#08111f");
+                circle.setAttribute("stroke-width", "0.01");
+
+                // Etiqueta con el texto de la palabra
+                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                text.setAttribute("x", x);
+                text.setAttribute("y", y + 0.07);
+                text.setAttribute("text-anchor", "middle");
+                text.setAttribute("fill", "#f4f8ff");
+                text.setAttribute("font-size", "0.065");
+                text.setAttribute("font-weight", "600");
+                text.textContent = palabra;
+
+                // Tooltip interactivo nativo al pasar el cursor
+                const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+                title.textContent = `${palabra} — Puesto #${puesto} (Similitud: ${similitud})`;
+                circle.appendChild(title);
+
+                g.appendChild(circle);
+                g.appendChild(text);
+                svgGrupo.appendChild(g);
+            });
+        }
+
+
         function mostrarIntentos(
             intentos
         ) {
@@ -1226,7 +1311,7 @@
                         </td>
                     </tr>
                 `;
-
+                actualizarGrafico([]);
                 return;
             }
 
@@ -1263,6 +1348,8 @@
 
                 tabla.appendChild(fila);
             }
+
+            actualizarGrafico(intentos);
         }
 
 
