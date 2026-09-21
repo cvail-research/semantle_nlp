@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: semantle-espanol
+    name: semantle-nlp
     runtime: python
     plan: free
 

@@ -1,25 +1,48 @@
 import math
 import os
 import random
+import threading
 
 import torch
 import torch.nn.functional as F
 from huggingface_hub import hf_hub_download
 
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# ============================================================
+# CONFIGURACIÓN DE ARCHIVOS Y MODELO
+# ============================================================
 
-REPO_ID_HF = "mick2332-q/semantle-es-vectors"
-NOMBRE_ARCHIVO_CACHE = "vectores_es_fp16.pt"
+BASE_DIR = os.path.dirname(
+    os.path.abspath(__file__)
+)
+
+REPO_ID_HF = (
+    "mick2332-q/semantle-es-vectors"
+)
+
+NOMBRE_ARCHIVO_CACHE = (
+    "vectores_es_fp16.pt"
+)
+
 RUTA_CACHE_BINARIO = os.path.join(
     BASE_DIR,
     NOMBRE_ARCHIVO_CACHE,
 )
 
+
+# Render no tiene GPU.
+# En local también funcionará automáticamente
+# con CPU si no hay CUDA disponible.
 DEVICE = torch.device(
-    "cuda" if torch.cuda.is_available() else "cpu"
+    "cuda"
+    if torch.cuda.is_available()
+    else "cpu"
 )
 
+
+# ============================================================
+# PALABRAS Y CATEGORÍAS
+# ============================================================
 
 PALABRAS_JUGABLES = [
     "guitarra",
@@ -60,6 +83,7 @@ CATEGORIAS = {
         "caballo",
         "pescado",
     ],
+
     "Lugares": [
         "hospital",
         "escuela",
@@ -69,6 +93,7 @@ CATEGORIAS = {
         "aeropuerto",
         "bosque",
     ],
+
     "Objetos": [
         "guitarra",
         "bicicleta",
@@ -77,11 +102,13 @@ CATEGORIAS = {
         "zapato",
         "juguete",
     ],
+
     "Personas y sociedad": [
         "soldado",
         "familia",
         "frontera",
     ],
+
     "Naturaleza": [
         "invierno",
         "tormenta",
@@ -89,25 +116,61 @@ CATEGORIAS = {
         "desierto",
         "silencio",
     ],
+
     "Salud y cuerpo": [
         "cocina",
         "medicina",
         "cerebro",
     ],
+
     "Cultura y entretenimiento": [
         "pintura",
         "orquesta",
         "cerveza",
     ],
+
     "Transporte y caminos": [
         "camino",
     ],
 }
 
 
+# ============================================================
+# CARGA DIFERIDA DE VECTORES
+# ============================================================
+
+PALABRAS = None
+TENSOR_VECTORES = None
+DICT_VOCAB = None
+
+TOTAL_PALABRAS = 0
+
+TENSOR_VECTORES_NORMALIZADOS = None
+
+_CACHE_CARGADA = False
+
+# Evita que dos peticiones intenten cargar
+# el archivo pesado al mismo tiempo.
+_CACHE_LOCK = threading.Lock()
+
+
 def cargar_cache():
-    if not os.path.exists(RUTA_CACHE_BINARIO):
-        print("Descargando vectores desde Hugging Face...")
+    """
+    Descarga y carga los vectores semánticos.
+
+    Esta función no se ejecuta al importar el archivo.
+    Solo se ejecuta cuando realmente se necesitan
+    las categorías o el motor del juego.
+    """
+
+    if not os.path.exists(
+        RUTA_CACHE_BINARIO
+    ):
+        print(
+            "Descargando vectores desde "
+            "Hugging Face...",
+            flush=True,
+        )
 
         hf_hub_download(
             repo_id=REPO_ID_HF,
@@ -115,7 +178,10 @@ def cargar_cache():
             local_dir=BASE_DIR,
         )
 
-    print("Cargando vectores...")
+    print(
+        "Cargando vectores...",
+        flush=True,
+    )
 
     datos = torch.load(
         RUTA_CACHE_BINARIO,
@@ -138,26 +204,78 @@ def cargar_cache():
     )
 
 
-PALABRAS, TENSOR_VECTORES, DICT_VOCAB = (
-    cargar_cache()
-)
+def asegurar_cache():
+    """
+    Carga los vectores solamente la primera vez
+    que se necesitan.
 
-TOTAL_PALABRAS = len(PALABRAS)
+    Esto permite que FastAPI arranque rápidamente
+    y que Render detecte el puerto antes de cargar
+    el archivo pesado.
+    """
+
+    global PALABRAS
+    global TENSOR_VECTORES
+    global DICT_VOCAB
+    global TOTAL_PALABRAS
+    global TENSOR_VECTORES_NORMALIZADOS
+    global _CACHE_CARGADA
+
+    if _CACHE_CARGADA:
+        return
+
+    with _CACHE_LOCK:
+        # Otra petición pudo cargar la caché
+        # mientras esperábamos el bloqueo.
+        if _CACHE_CARGADA:
+            return
+
+        print(
+            "Cargando vectores semánticos...",
+            flush=True,
+        )
+
+        (
+            PALABRAS,
+            TENSOR_VECTORES,
+            DICT_VOCAB,
+        ) = cargar_cache()
+
+        TOTAL_PALABRAS = len(
+            PALABRAS
+        )
+
+        TENSOR_VECTORES_NORMALIZADOS = (
+            F.normalize(
+                TENSOR_VECTORES,
+                p=2,
+                dim=1,
+            )
+        )
+
+        _CACHE_CARGADA = True
+
+        print(
+            "Vectores semánticos cargados.",
+            flush=True,
+        )
 
 
-# Se normalizan una sola vez para poder calcular
-# correctamente la similitud de coseno.
-TENSOR_VECTORES_NORMALIZADOS = F.normalize(
-    TENSOR_VECTORES,
-    p=2,
-    dim=1,
-)
+# ============================================================
+# CATEGORÍAS Y VALIDACIONES
+# ============================================================
 
+def obtener_categorias() -> dict[
+    str,
+    list[str],
+]:
+    asegurar_cache()
 
-def obtener_categorias() -> dict[str, list[str]]:
     resultado = {}
 
-    for categoria, palabras in CATEGORIAS.items():
+    for categoria, palabras in (
+        CATEGORIAS.items()
+    ):
         palabras_validas = sorted(
             palabra
             for palabra in palabras
@@ -165,19 +283,27 @@ def obtener_categorias() -> dict[str, list[str]]:
         )
 
         if palabras_validas:
-            resultado[categoria] = palabras_validas
+            resultado[categoria] = (
+                palabras_validas
+            )
 
     return resultado
 
 
 def obtener_palabras_jugables() -> list[str]:
+    asegurar_cache()
+
     palabras_validas = []
 
     for palabra in PALABRAS_JUGABLES:
         if palabra in DICT_VOCAB:
-            palabras_validas.append(palabra)
+            palabras_validas.append(
+                palabra
+            )
 
-    return sorted(palabras_validas)
+    return sorted(
+        palabras_validas
+    )
 
 
 def validar_palabra_jugable(
@@ -186,11 +312,18 @@ def validar_palabra_jugable(
 ) -> bool:
     categorias = obtener_categorias()
 
+    palabra = palabra.strip().lower()
+    categoria = categoria.strip()
+
     return (
         categoria in categorias
         and palabra in categorias[categoria]
     )
 
+
+# ============================================================
+# COLORES SEGÚN LA CERCANÍA
+# ============================================================
 
 def obtener_color_temperatura(
     puesto: int,
@@ -213,11 +346,19 @@ def obtener_color_temperatura(
     return "#EF5350"
 
 
+# ============================================================
+# MOTOR DEL JUEGO
+# ============================================================
+
 class GameEngine:
     def __init__(
         self,
         palabra_secreta: str,
     ):
+        # Se carga aquí, cuando se crea una partida,
+        # no cuando FastAPI importa el módulo.
+        asegurar_cache()
+
         palabra_secreta = (
             palabra_secreta.strip().lower()
         )
@@ -228,14 +369,18 @@ class GameEngine:
                 "en el archivo .pt."
             )
 
-        self.palabra_secreta = palabra_secreta
+        self.palabra_secreta = (
+            palabra_secreta
+        )
 
         indice = DICT_VOCAB[
             palabra_secreta
         ]
 
         self.vector_secreto = (
-            TENSOR_VECTORES_NORMALIZADOS[indice]
+            TENSOR_VECTORES_NORMALIZADOS[
+                indice
+            ]
         )
 
         self.ranking_dict = {}
@@ -266,7 +411,10 @@ class GameEngine:
             )
         }
 
-    def evaluar(self, palabra: str) -> dict:
+    def evaluar(
+        self,
+        palabra: str,
+    ) -> dict:
         palabra = palabra.strip().lower()
 
         if not palabra:
@@ -283,7 +431,9 @@ class GameEngine:
         indice = DICT_VOCAB[palabra]
 
         vector_palabra = (
-            TENSOR_VECTORES_NORMALIZADOS[indice]
+            TENSOR_VECTORES_NORMALIZADOS[
+                indice
+            ]
         )
 
         similitud = float(
@@ -293,7 +443,9 @@ class GameEngine:
             ).item()
         )
 
-        puesto = self.ranking_dict[palabra]
+        puesto = self.ranking_dict[
+            palabra
+        ]
 
         es_correcta = (
             palabra == self.palabra_secreta
@@ -343,8 +495,14 @@ class GameEngine:
             "color": obtener_color_temperatura(
                 puesto
             ),
-            "x": round(posicion_x, 5),
-            "y": round(posicion_y, 5),
+            "x": round(
+                posicion_x,
+                5,
+            ),
+            "y": round(
+                posicion_y,
+                5,
+            ),
         }
 
     def obtener_pista(
@@ -364,8 +522,9 @@ class GameEngine:
             )
 
             return (
-                f"La palabra '{palabra}' está cerca. "
-                f"Está en el puesto #{posicion}."
+                f"La palabra '{palabra}' "
+                f"está cerca. Está en el "
+                f"puesto #{posicion}."
             )
 
         if numero_pista == 2:
@@ -381,8 +540,9 @@ class GameEngine:
             )
 
             return (
-                f"La palabra '{palabra}' está muy "
-                f"cerca. Está en el puesto #{posicion}."
+                f"La palabra '{palabra}' "
+                f"está muy cerca. Está en el "
+                f"puesto #{posicion}."
             )
 
         if numero_pista == 3:
@@ -395,8 +555,11 @@ class GameEngine:
             )
 
             return (
-                f"La palabra empieza por '{inicial}' "
-                f"y tiene {longitud} letras."
+                f"La palabra empieza por "
+                f"'{inicial}' y tiene "
+                f"{longitud} letras."
             )
 
-        return "No hay más pistas disponibles."
+        return (
+            "No hay más pistas disponibles."
+        )
