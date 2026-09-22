@@ -21,6 +21,7 @@ from pydantic import BaseModel
 
 from game_engine import (
     GameEngine,
+    asegurar_cache,
     obtener_categorias,
     validar_palabra_jugable,
 )
@@ -38,6 +39,9 @@ app = FastAPI(
     title="Semantle Español Multijugador"
 )
 
+@app.on_event("startup")
+def cargar_modelo_al_iniciar():
+    asegurar_cache()
 
 app.mount(
     "/static",

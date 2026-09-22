@@ -15,3 +15,5 @@ wheels/
 .env
 .env.*
 !.env.example
+
+tunel.log
