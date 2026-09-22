@@ -31,8 +31,6 @@ RUTA_CACHE_BINARIO = os.path.join(
 
 
 # Render no tiene GPU.
-# En local también funcionará automáticamente
-# con CPU si no hay CUDA disponible.
 DEVICE = torch.device(
     "cuda"
     if torch.cuda.is_available()
@@ -41,96 +39,154 @@ DEVICE = torch.device(
 
 
 # ============================================================
-# PALABRAS Y CATEGORÍAS
+# CATEGORÍAS Y PISTAS MANUALES (PALABRAS CLAVE + PISTA FINAL)
 # ============================================================
-
-PALABRAS_JUGABLES = [
-    "guitarra",
-    "soldado",
-    "cocina",
-    "hospital",
-    "bicicleta",
-    "invierno",
-    "familia",
-    "escuela",
-    "pescado",
-    "ventana",
-    "camino",
-    "silencio",
-    "tormenta",
-    "mercado",
-    "caballo",
-    "pintura",
-    "medicina",
-    "revista",
-    "frontera",
-    "naranja",
-    "playa",
-    "castillo",
-    "orquesta",
-    "desierto",
-    "zapato",
-    "cerebro",
-    "bosque",
-    "cerveza",
-    "aeropuerto",
-    "juguete",
-]
-
 
 CATEGORIAS = {
     "Animales": [
-        "caballo",
-        "pescado",
+        {
+            "palabra": "caballo",
+            "pistas": ["yegua", "jinete", "Empieza por 'C' y tiene 7 letras."]
+        },
+        {
+            "palabra": "pescado",
+            "pistas": ["atún", "mar", "Empieza por 'P' y tiene 7 letras."]
+        }
     ],
 
     "Lugares": [
-        "hospital",
-        "escuela",
-        "mercado",
-        "playa",
-        "castillo",
-        "aeropuerto",
-        "bosque",
+        {
+            "palabra": "hospital",
+            "pistas": ["medico", "enfermera", "Empieza por 'H' y tiene 8 letras."]
+        },
+        {
+            "palabra": "escuela",
+            "pistas": ["profesor", "estudiante", "Empieza por 'E' y tiene 7 letras."]
+        },
+        {
+            "palabra": "mercado",
+            "pistas": ["tienda", "comida", "Empieza por 'M' y tiene 7 letras."]
+        },
+        {
+            "palabra": "playa",
+            "pistas": ["arena", "mar", "Empieza por 'P' y tiene 5 letras."]
+        },
+        {
+            "palabra": "castillo",
+            "pistas": ["reina", "muralla", "Empieza por 'C' y tiene 8 letras."]
+        },
+        {
+            "palabra": "aeropuerto",
+            "pistas": ["avion", "viaje", "Empieza por 'A' y tiene 10 letras."]
+        },
+        {
+            "palabra": "bosque",
+            "pistas": ["arbol", "naturaleza", "Empieza por 'B' y tiene 6 letras."]
+        }
     ],
 
     "Objetos": [
-        "guitarra",
-        "bicicleta",
-        "ventana",
-        "revista",
-        "zapato",
-        "juguete",
+        {
+            "palabra": "guitarra",
+            "pistas": ["musica", "cuerdas", "Empieza por 'G' y tiene 8 letras."]
+        },
+        {
+            "palabra": "bicicleta",
+            "pistas": ["rueda", "pedal", "Empieza por 'B' y tiene 9 letras."]
+        },
+        {
+            "palabra": "ventana",
+            "pistas": ["vidrio", "casa", "Empieza por 'V' y tiene 7 letras."]
+        },
+        {
+            "palabra": "revista",
+            "pistas": ["papel", "lectura", "Empieza por 'R' y tiene 7 letras."]
+        },
+        {
+            "palabra": "zapato",
+            "pistas": ["pie", "bota", "Empieza por 'Z' y tiene 6 letras."]
+        },
+        {
+            "palabra": "juguete",
+            "pistas": ["muneco", "nino", "Empieza por 'J' y tiene 7 letras."]
+        }
     ],
 
     "Personas y sociedad": [
-        "soldado",
-        "familia",
-        "frontera",
+        {
+            "palabra": "soldado",
+            "pistas": ["ejercito", "guerra", "Empieza por 'S' y tiene 7 letras."]
+        },
+        {
+            "palabra": "familia",
+            "pistas": ["padres", "casa", "Empieza por 'F' y tiene 7 letras."]
+        },
+        {
+            "palabra": "frontera",
+            "pistas": ["pais", "limite", "Empieza por 'F' y tiene 8 letras."]
+        }
     ],
 
     "Naturaleza": [
-        "invierno",
-        "tormenta",
-        "naranja",
-        "desierto",
-        "silencio",
+        {
+            "palabra": "invierno",
+            "pistas": ["frio", "lluvia", "Empieza por 'I' y tiene 8 letras."]
+        },
+        {
+            "palabra": "tormenta",
+            "pistas": ["rayo", "viento", "Empieza por 'T' y tiene 8 letras."]
+        },
+        {
+            "palabra": "naranja",
+            "pistas": ["fruta", "jugo", "Empieza por 'N' y tiene 7 letras."]
+        },
+        {
+            "palabra": "desierto",
+            "pistas": ["arena", "calor", "Empieza por 'D' y tiene 8 letras."]
+        },
+        {
+            "palabra": "silencio",
+            "pistas": ["calma", "ruido", "Empieza por 'S' y tiene 8 letras."]
+        }
     ],
 
     "Salud y cuerpo": [
-        "cocina",
-        "medicina",
-        "cerebro",
+        {
+            "palabra": "cocina",
+            "pistas": ["comida", "fuego", "Empieza por 'C' y tiene 6 letras."]
+        },
+        {
+            "palabra": "medicina",
+            "pistas": ["doctor", "pastilla", "Empieza por 'M' y tiene 8 letras."]
+        },
+        {
+            "palabra": "cerebro",
+            "pistas": ["mente", "cabeza", "Empieza por 'C' y tiene 7 letras."]
+        }
     ],
 
-    "Cultura y entretenimiento": [
-        "pintura",
-        "orquesta",
-        "cerveza",
-    ],
-
-    "Transporte y caminos": [
-        "camino",
+    "Transportes": [
+        
+        {
+            "palabra": "carro",
+            "pistas": ["electricidad", "chasis", "Empieza por 'C' y tiene 5 letras."]
+        },
+        {
+            "palabra": "moto",
+            "pistas": ["pato", "dos", "Empieza por 'M' y tiene 4 letras."]
+        },
+        {
+            "palabra": "avion",
+            "pistas": ["aeropuerto", "vuelo", "Empieza por 'A' y tiene 5 letras."]
+        },
+        {
+            "palabra": "barco",
+            "pistas": ["nave", "puerto", "Empieza por 'B' y tiene 5 letras."]
+        },
+        {
+            "palabra": "bicicleta",
+            "pistas": ["pedal", "rueda", "Empieza por 'B' y tiene 9 letras."]
+        }
     ],
 }
 
@@ -149,20 +205,10 @@ TENSOR_VECTORES_NORMALIZADOS = None
 
 _CACHE_CARGADA = False
 
-# Evita que dos peticiones intenten cargar
-# el archivo pesado al mismo tiempo.
 _CACHE_LOCK = threading.Lock()
 
 
 def cargar_cache():
-    """
-    Descarga y carga los vectores semánticos.
-
-    Esta función no se ejecuta al importar el archivo.
-    Solo se ejecuta cuando realmente se necesitan
-    las categorías o el motor del juego.
-    """
-
     if not os.path.exists(
         RUTA_CACHE_BINARIO
     ):
@@ -205,15 +251,6 @@ def cargar_cache():
 
 
 def asegurar_cache():
-    """
-    Carga los vectores solamente la primera vez
-    que se necesitan.
-
-    Esto permite que FastAPI arranque rápidamente
-    y que Render detecte el puerto antes de cargar
-    el archivo pesado.
-    """
-
     global PALABRAS
     global TENSOR_VECTORES
     global DICT_VOCAB
@@ -225,8 +262,6 @@ def asegurar_cache():
         return
 
     with _CACHE_LOCK:
-        # Otra petición pudo cargar la caché
-        # mientras esperábamos el bloqueo.
         if _CACHE_CARGADA:
             return
 
@@ -265,27 +300,20 @@ def asegurar_cache():
 # CATEGORÍAS Y VALIDACIONES
 # ============================================================
 
-def obtener_categorias() -> dict[
-    str,
-    list[str],
-]:
+def obtener_categorias() -> dict[str, list[str]]:
     asegurar_cache()
 
     resultado = {}
 
-    for categoria, palabras in (
-        CATEGORIAS.items()
-    ):
-        palabras_validas = sorted(
-            palabra
-            for palabra in palabras
-            if palabra in DICT_VOCAB
-        )
+    for categoria, items in CATEGORIAS.items():
+        palabras_validas = []
+        for item in items:
+            palabra = item["palabra"]
+            if palabra in DICT_VOCAB:
+                palabras_validas.append(palabra)
 
         if palabras_validas:
-            resultado[categoria] = (
-                palabras_validas
-            )
+            resultado[categoria] = sorted(palabras_validas)
 
     return resultado
 
@@ -293,31 +321,28 @@ def obtener_categorias() -> dict[
 def obtener_palabras_jugables() -> list[str]:
     asegurar_cache()
 
-    palabras_validas = []
+    palabras_validas = set()
+    for items in CATEGORIAS.values():
+        for item in items:
+            palabra = item["palabra"]
+            if palabra in DICT_VOCAB:
+                palabras_validas.add(palabra)
 
-    for palabra in PALABRAS_JUGABLES:
-        if palabra in DICT_VOCAB:
-            palabras_validas.append(
-                palabra
-            )
-
-    return sorted(
-        palabras_validas
-    )
+    return sorted(list(palabras_validas))
 
 
 def validar_palabra_jugable(
     palabra: str,
     categoria: str,
 ) -> bool:
-    categorias = obtener_categorias()
+    cat_validas = obtener_categorias()
 
     palabra = palabra.strip().lower()
     categoria = categoria.strip()
 
     return (
-        categoria in categorias
-        and palabra in categorias[categoria]
+        categoria in cat_validas
+        and palabra in cat_validas[categoria]
     )
 
 
@@ -355,8 +380,6 @@ class GameEngine:
         self,
         palabra_secreta: str,
     ):
-        # Se carga aquí, cuando se crea una partida,
-        # no cuando FastAPI importa el módulo.
         asegurar_cache()
 
         palabra_secreta = (
@@ -509,57 +532,35 @@ class GameEngine:
         self,
         numero_pista: int,
     ) -> str:
+        # Buscar las pistas personalizadas de esta palabra secreta
+        pistas_lista = None
+        for cat_items in CATEGORIAS.values():
+            for item in cat_items:
+                if item["palabra"] == self.palabra_secreta:
+                    pistas_lista = item["pistas"]
+                    break
+            if pistas_lista:
+                break
+
+        # Si se encontraron pistas definidas manualmente para este número (1, 2 o 3)
+        if pistas_lista and 0 <= numero_pista - 1 < len(pistas_lista):
+            pista_texto = pistas_lista[numero_pista - 1]
+            
+            # Si las primeras dos pistas son palabras, evaluamos su cercanía automáticamente en el juego
+            if numero_pista in [1, 2] and pista_texto in self.ranking_dict:
+                puesto_pista = self.ranking_dict[pista_texto]
+                return f"Pista {numero_pista}: La palabra relacionada '{pista_texto}' está en el puesto #{puesto_pista}."
+            else:
+                return f"Pista {numero_pista}: {pista_texto}"
+
+        # Respaldo por defecto si faltara alguna pista
         if numero_pista == 1:
-            posicion = min(
-                1000,
-                TOTAL_PALABRAS,
-            )
+            pos = min(1000, TOTAL_PALABRAS)
+            return f"Pista 1: Una palabra cercana está en el puesto #{pos}: '{self.orden_palabras_ranking[pos - 1]}'."
+        elif numero_pista == 2:
+            pos = min(300, TOTAL_PALABRAS)
+            return f"Pista 2: Una palabra muy cercana está en el puesto #{pos}: '{self.orden_palabras_ranking[pos - 1]}'."
+        elif numero_pista == 3:
+            return f"Pista 3: La palabra empieza por '{self.palabra_secreta[0].upper()}' y tiene {len(self.palabra_secreta)} letras."
 
-            palabra = (
-                self.orden_palabras_ranking[
-                    posicion - 1
-                ]
-            )
-
-            return (
-                f"La palabra '{palabra}' "
-                f"está cerca. Está en el "
-                f"puesto #{posicion}."
-            )
-
-        if numero_pista == 2:
-            posicion = min(
-                300,
-                TOTAL_PALABRAS,
-            )
-
-            palabra = (
-                self.orden_palabras_ranking[
-                    posicion - 1
-                ]
-            )
-
-            return (
-                f"La palabra '{palabra}' "
-                f"está muy cerca. Está en el "
-                f"puesto #{posicion}."
-            )
-
-        if numero_pista == 3:
-            inicial = (
-                self.palabra_secreta[0].upper()
-            )
-
-            longitud = len(
-                self.palabra_secreta
-            )
-
-            return (
-                f"La palabra empieza por "
-                f"'{inicial}' y tiene "
-                f"{longitud} letras."
-            )
-
-        return (
-            "No hay más pistas disponibles."
-        )
+        return "No hay más pistas disponibles."

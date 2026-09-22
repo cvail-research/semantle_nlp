@@ -476,6 +476,18 @@
                 opciones
             );
 
+            // Solo cerramos sesión si el servidor rechaza el token por seguridad (401 o 403)
+            if (respuesta.status === 401 || respuesta.status === 403) {
+                if (adminToken) {
+                    localStorage.removeItem("admin_token");
+                    adminToken = null;
+                    document.getElementById("admin-panel").classList.add("hidden");
+                    document.getElementById("login-panel").classList.remove("hidden");
+                    document.getElementById("login-message").textContent = "La sesión expiró. Por favor ingresa de nuevo.";
+                    throw new Error("Sesión caducada");
+                }
+            }
+
             const datos =
                 await respuesta.json();
 
