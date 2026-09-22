@@ -1,4 +1,4 @@
-# Python-generated files
+# Archivos generados por Python
 __pycache__/
 *.py[oc]
 build/
@@ -6,14 +6,24 @@ dist/
 wheels/
 *.egg-info
 
-# Virtual environments
+# Entorno virtual
 .venv
-# Archivos de datos pesados (Embeddings y Caché)
-*.vec
-*.pt
 
+# Modelos y vectores. El vocabulario pesa 111 MB y el archivo original de
+# Hugging Face 1,2 GB: se llevan aparte (USB) o se descargan en el sitio.
+*.pt
+*.vec
+
+# Caché de descargas de Hugging Face
+.cache
+
+# Configuración local de herramientas
+.claude
+
+# Secretos. .env.example sí se sube, como plantilla.
 .env
 .env.*
 !.env.example
 
+# Registro del túnel de cloudflared
 tunel.log

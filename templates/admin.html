@@ -17,6 +17,28 @@
 </head>
 
 <body>
+    <div
+        id="countdown-overlay"
+        class="countdown-overlay hidden"
+    >
+        <div class="countdown-card">
+            <div class="countdown-title">
+                La partida comienza en
+            </div>
+
+            <div
+                id="countdown-number"
+                class="countdown-number"
+            >
+                3
+            </div>
+
+            <div class="countdown-subtitle">
+                Prepárense para jugar
+            </div>
+        </div>
+    </div>
+
     <main class="container">
         <header class="page-header">
             <div class="brand">
@@ -245,7 +267,7 @@
                 <p>
                     Jugadores conectados:
                     <strong id="player-count">
-                        0/10
+                        -
                     </strong>
                 </p>
             </div>
@@ -360,6 +382,18 @@
 
         let categorias = {};
         let ultimaCuentaRegresiva = null;
+
+
+        // Los nombres los escriben los jugadores, así que nunca se insertan
+        // crudos en el HTML del panel.
+        function escapar(texto) {
+            const div = document.createElement("div");
+
+            div.textContent =
+                texto == null ? "" : String(texto);
+
+            return div.innerHTML;
+        }
 
 
         function mostrarPanelAdmin() {
@@ -964,7 +998,7 @@
                     );
 
                 fila.innerHTML = `
-                    <td>${jugador.nombre}</td>
+                    <td>${escapar(jugador.nombre)}</td>
                     <td>${jugador.intentos}</td>
                     <td>
                         ${
@@ -1068,7 +1102,7 @@
                             </span>
 
                             <strong>
-                                ${jugador.nombre}
+                                ${escapar(jugador.nombre)}
                             </strong>
 
                             <span>
@@ -1129,7 +1163,7 @@
                             </span>
 
                             <strong>
-                                ${jugador.nombre}
+                                ${escapar(jugador.nombre)}
                             </strong>
 
                             <span>
@@ -1189,7 +1223,7 @@
                                     </strong>
 
                                     <span>
-                                        ${ronda.categoria}
+                                        ${escapar(ronda.categoria)}
                                     </span>
                                 </div>
 
@@ -1205,7 +1239,7 @@
                                                         )}
 
                                                         <strong>
-                                                            ${jugador.nombre}
+                                                            ${escapar(jugador.nombre)}
                                                         </strong>
 
                                                         —
@@ -1246,7 +1280,7 @@
                             jugador => `
                                 <li>
                                     <strong>
-                                        ${jugador.nombre}
+                                        ${escapar(jugador.nombre)}
                                     </strong>
 
                                     —

@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Laboratorio de palabras</title>
+
+    <link
+        rel="stylesheet"
+        href="/static/style.css"
+    >
+</head>
+
+<body>
+    <main class="container">
+        <header class="page-header">
+            <div class="brand">
+                <div class="brand-icon">
+                    🧪
+                </div>
+
+                <div>
+                    <h1>Laboratorio de palabras</h1>
+
+                    <p class="subtitle">
+                        Juega con lo que la computadora
+                        entiende por significado
+                    </p>
+                </div>
+            </div>
+
+            <a href="/" class="link-button lab-back">
+                ← Volver al juego
+            </a>
+        </header>
+
+
+        <!-- =================================================
+             1. ARITMÉTICA DE PALABRAS
+        ================================================== -->
+
+        <section class="card">
+            <div class="panel-title">
+                <div class="panel-title-icon">
+                    ➕
+                </div>
+
+                <h2>Suma y resta de palabras</h2>
+            </div>
+
+            <p class="learn-text">
+                A cada palabra la computadora le puso
+                300 números. Y resulta que esos números
+                se pueden <strong>sumar y restar</strong>
+                como si fueran cantidades. Prueba:
+                quítale a <em>rey</em> la idea de
+                <em>hombre</em>, súmale <em>mujer</em>,
+                y mira qué sale.
+            </p>
+
+            <div class="math-row">
+                <input
+                    id="mat-a"
+                    class="math-input"
+                    type="text"
+                    value="rey"
+                    autocomplete="off"
+                >
+
+                <span class="math-op">−</span>
+
+                <input
+                    id="mat-b"
+                    class="math-input"
+                    type="text"
+                    value="hombre"
+                    autocomplete="off"
+                >
+
+                <span class="math-op">+</span>
+
+                <input
+                    id="mat-c"
+                    class="math-input"
+                    type="text"
+                    value="mujer"
+                    autocomplete="off"
+                >
+
+                <span class="math-op">=</span>
+
+                <button
+                    type="button"
+                    id="mat-boton"
+                    class="math-go"
+                >
+                    ¿?
+                </button>
+            </div>
+
+            <div id="mat-resultado" class="math-result"></div>
+
+            <p id="mat-mensaje" class="message"></p>
+
+            <div class="preset-row" id="presets"></div>
+        </section>
+
+
+        <!-- =================================================
+             2. EL INTRUSO
+        ================================================== -->
+
+        <section class="card">
+            <div class="panel-title">
+                <div class="panel-title-icon">
+                    🕵️
+                </div>
+
+                <h2>Encuentra el intruso</h2>
+            </div>
+
+            <p class="learn-text">
+                Tres de estas palabras se parecen
+                entre ellas. Una no pega.
+                <strong>Toca la que sobra</strong> y
+                mira si la computadora piensa igual
+                que tú.
+            </p>
+
+            <div id="intruso-opciones" class="intruso-grid"></div>
+
+            <div id="intruso-resultado" class="intruso-result"></div>
+
+            <div class="game-actions">
+                <button
+                    type="button"
+                    id="intruso-otro"
+                    class="secondary"
+                >
+                    🔄 Otras palabras
+                </button>
+            </div>
+
+            <div class="score-row">
+                <span>
+                    Tus aciertos:
+                    <strong id="intruso-aciertos">0</strong>
+                    de
+                    <strong id="intruso-total">0</strong>
+                </span>
+            </div>
+        </section>
+
+
+        <!-- =================================================
+             3. EXPLORADOR
+        ================================================== -->
+
+        <section class="card">
+            <div class="panel-title">
+                <div class="panel-title-icon">
+                    🔭
+                </div>
+
+                <h2>Explorador de vecinos</h2>
+            </div>
+
+            <p class="learn-text">
+                Escribe cualquier palabra y mira cuáles
+                le quedan cerca en el mapa. Nadie le
+                enseñó estas relaciones a la
+                computadora: las dedujo sola, viendo en
+                qué frases aparece cada palabra en
+                millones de textos.
+            </p>
+
+            <div class="guess-area">
+                <input
+                    id="exp-palabra"
+                    type="text"
+                    placeholder="Escribe una palabra"
+                    autocomplete="off"
+                    autocapitalize="none"
+                >
+
+                <button type="button" id="exp-boton">
+                    Explorar
+                </button>
+            </div>
+
+            <div class="preset-row" id="exp-presets"></div>
+
+            <div id="exp-resultado" class="neighbor-grid"></div>
+
+            <p id="exp-mensaje" class="message"></p>
+        </section>
+    </main>
+
+
+    <script>
+    (function () {
+        "use strict";
+
+        const $ = (id) => document.getElementById(id);
+
+        function escapar(texto) {
+            const div = document.createElement("div");
+            div.textContent = texto == null ? "" : String(texto);
+            return div.innerHTML;
+        }
+
+        async function pedir(ruta, datos) {
+            const opciones = datos
+                ? {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify(datos)
+                  }
+                : {};
+
+            const respuesta = await fetch(ruta, opciones);
+            const cuerpo = await respuesta.json();
+
+            if (!respuesta.ok) {
+                throw new Error(cuerpo.detail || "Algo salió mal.");
+            }
+
+            return cuerpo;
+        }
+
+        // ----------------------------------------------------
+        // 1. ARITMÉTICA
+        // ----------------------------------------------------
+
+        const EJEMPLOS = [
+            ["rey", "hombre", "mujer"],
+            ["gatito", "gato", "perro"],
+            ["zapato", "pie", "mano"],
+            ["miel", "abeja", "vaca"],
+            ["parís", "francia", "colombia"],
+            ["noche", "día", "luz"]
+        ];
+
+        function pintarPresets() {
+            $("presets").innerHTML = EJEMPLOS.map(
+                (e, i) =>
+                    '<button type="button" class="preset" data-i="' + i + '">' +
+                    escapar(e[0]) + " − " + escapar(e[1]) +
+                    " + " + escapar(e[2]) + "</button>"
+            ).join("");
+
+            $("presets").querySelectorAll(".preset").forEach((boton) => {
+                boton.addEventListener("click", () => {
+                    const e = EJEMPLOS[Number(boton.dataset.i)];
+                    $("mat-a").value = e[0];
+                    $("mat-b").value = e[1];
+                    $("mat-c").value = e[2];
+                    calcular();
+                });
+            });
+        }
+
+        async function calcular() {
+            const a = $("mat-a").value.trim();
+            const b = $("mat-b").value.trim();
+            const c = $("mat-c").value.trim();
+
+            const mensaje = $("mat-mensaje");
+            mensaje.textContent = "";
+            mensaje.className = "message";
+
+            if (!a || !b || !c) {
+                mensaje.textContent = "Escribe las tres palabras.";
+                mensaje.className = "message message-error";
+                return;
+            }
+
+            $("mat-boton").disabled = true;
+            $("mat-resultado").innerHTML =
+                '<div class="math-loading">Calculando...</div>';
+
+            try {
+                const datos = await pedir(
+                    "/api/laboratorio/analogia",
+                    { a: a, b: b, c: c }
+                );
+
+                const lista = datos.resultados;
+
+                $("mat-resultado").innerHTML =
+                    '<div class="math-winner">' +
+                    escapar(lista[0].palabra) +
+                    "</div>" +
+                    '<div class="math-others">También quedaron cerca: ' +
+                    lista
+                        .slice(1)
+                        .map((r) => escapar(r.palabra))
+                        .join(", ") +
+                    "</div>";
+            } catch (error) {
+                $("mat-resultado").innerHTML = "";
+                mensaje.textContent = error.message;
+                mensaje.className = "message message-error";
+            } finally {
+                $("mat-boton").disabled = false;
+            }
+        }
+
+        // ----------------------------------------------------
+        // 2. EL INTRUSO
+        // ----------------------------------------------------
+
+        let palabrasIntruso = [];
+        let respondido = false;
+        let aciertos = 0;
+        let total = 0;
+
+        async function nuevoIntruso() {
+            respondido = false;
+            $("intruso-resultado").innerHTML = "";
+            $("intruso-opciones").innerHTML =
+                '<div class="math-loading">Buscando palabras...</div>';
+
+            try {
+                const datos = await pedir("/api/laboratorio/intruso");
+                palabrasIntruso = datos.palabras;
+
+                $("intruso-opciones").innerHTML = palabrasIntruso
+                    .map(
+                        (p) =>
+                            '<button type="button" class="intruso-card" ' +
+                            'data-p="' + escapar(p) + '">' +
+                            escapar(p) + "</button>"
+                    )
+                    .join("");
+
+                $("intruso-opciones")
+                    .querySelectorAll(".intruso-card")
+                    .forEach((boton) => {
+                        boton.addEventListener("click", () =>
+                            responder(boton.dataset.p)
+                        );
+                    });
+            } catch (error) {
+                $("intruso-opciones").innerHTML = "";
+                $("intruso-resultado").innerHTML =
+                    '<p class="message message-error">' +
+                    escapar(error.message) + "</p>";
+            }
+        }
+
+        async function responder(elegida) {
+            if (respondido) {
+                return;
+            }
+
+            respondido = true;
+
+            try {
+                const datos = await pedir(
+                    "/api/laboratorio/intruso",
+                    { palabras: palabrasIntruso }
+                );
+
+                const correcta = datos.intruso;
+                const acerto = elegida === correcta;
+
+                total += 1;
+                if (acerto) {
+                    aciertos += 1;
+                }
+
+                $("intruso-aciertos").textContent = aciertos;
+                $("intruso-total").textContent = total;
+
+                $("intruso-opciones")
+                    .querySelectorAll(".intruso-card")
+                    .forEach((boton) => {
+                        const p = boton.dataset.p;
+                        if (p === correcta) {
+                            boton.classList.add("intruso-ok");
+                        } else if (p === elegida) {
+                            boton.classList.add("intruso-mal");
+                        }
+                        boton.disabled = true;
+                    });
+
+                const orden = datos.parecidos
+                    .slice()
+                    .sort((x, y) => y.encaje - x.encaje);
+
+                $("intruso-resultado").innerHTML =
+                    '<div class="intruso-veredicto ' +
+                    (acerto ? "bien" : "mal") + '">' +
+                    (acerto
+                        ? "🎉 ¡Pensaste igual que la computadora!"
+                        : "🤔 La computadora eligió “" +
+                          escapar(correcta) + "”") +
+                    "</div>" +
+                    '<p class="learn-text">Qué tanto encaja cada una ' +
+                    "con el grupo:</p>" +
+                    '<div class="encaje-lista">' +
+                    orden
+                        .map(
+                            (x) =>
+                                '<div class="encaje-fila">' +
+                                '<span class="encaje-palabra">' +
+                                escapar(x.palabra) + "</span>" +
+                                '<span class="encaje-barra">' +
+                                '<span class="encaje-relleno" style="width:' +
+                                Math.max(3, Math.round(x.encaje * 100)) +
+                                '%"></span></span>' +
+                                "</div>"
+                        )
+                        .join("") +
+                    "</div>";
+            } catch (error) {
+                $("intruso-resultado").innerHTML =
+                    '<p class="message message-error">' +
+                    escapar(error.message) + "</p>";
+            }
+        }
+
+        // ----------------------------------------------------
+        // 3. EXPLORADOR
+        // ----------------------------------------------------
+
+        const SUGERENCIAS = [
+            "dinosaurio", "chocolate", "arcoíris",
+            "volcán", "pirata", "robot"
+        ];
+
+        function pintarSugerencias() {
+            $("exp-presets").innerHTML = SUGERENCIAS.map(
+                (p) =>
+                    '<button type="button" class="preset" data-p="' +
+                    escapar(p) + '">' + escapar(p) + "</button>"
+            ).join("");
+
+            $("exp-presets").querySelectorAll(".preset").forEach((boton) => {
+                boton.addEventListener("click", () => {
+                    $("exp-palabra").value = boton.dataset.p;
+                    explorar();
+                });
+            });
+        }
+
+        async function explorar() {
+            const palabra = $("exp-palabra").value.trim();
+            const mensaje = $("exp-mensaje");
+
+            mensaje.textContent = "";
+            mensaje.className = "message";
+
+            if (!palabra) {
+                return;
+            }
+
+            $("exp-boton").disabled = true;
+            $("exp-resultado").innerHTML =
+                '<div class="math-loading">Buscando...</div>';
+
+            try {
+                const datos = await pedir(
+                    "/api/laboratorio/vecinos",
+                    { palabra: palabra }
+                );
+
+                $("exp-resultado").innerHTML = datos.vecinos
+                    .map(
+                        (v) =>
+                            '<div class="neighbor-chip">' +
+                            '<span class="neighbor-word">' +
+                            escapar(v.palabra) + "</span>" +
+                            '<span class="neighbor-score">' +
+                            Math.round(v.similitud * 100) +
+                            "% parecido</span></div>"
+                    )
+                    .join("");
+            } catch (error) {
+                $("exp-resultado").innerHTML = "";
+                mensaje.textContent = error.message;
+                mensaje.className = "message message-error";
+            } finally {
+                $("exp-boton").disabled = false;
+            }
+        }
+
+        // ----------------------------------------------------
+
+        $("mat-boton").addEventListener("click", calcular);
+        $("intruso-otro").addEventListener("click", nuevoIntruso);
+        $("exp-boton").addEventListener("click", explorar);
+
+        ["mat-a", "mat-b", "mat-c"].forEach((id) => {
+            $(id).addEventListener("keydown", (e) => {
+                if (e.key === "Enter") calcular();
+            });
+        });
+
+        $("exp-palabra").addEventListener("keydown", (e) => {
+            if (e.key === "Enter") explorar();
+        });
+
+        pintarPresets();
+        pintarSugerencias();
+        calcular();
+        nuevoIntruso();
+    })();
+    </script>
+</body>
+</html>

@@ -8,7 +8,7 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Jugador - Semantle</title>
+    <title>Semantle NLP</title>
 
     <link
         rel="stylesheet"
@@ -18,7 +18,7 @@
 
 <body>
     <!-- =====================================================
-         MODAL DE CUENTA REGRESIVA
+         CUENTA REGRESIVA
     ====================================================== -->
 
     <div
@@ -44,66 +44,6 @@
     </div>
 
 
-    <!-- =====================================================
-         MODAL DEL PODIO
-    ====================================================== -->
-
-    <div
-        id="podium-modal"
-        class="podium-modal hidden"
-    >
-        <div
-            class="podium-modal-backdrop"
-            onclick="cerrarPodio()"
-        ></div>
-
-        <section
-            class="podium-modal-card"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="podium-title"
-        >
-            <button
-                type="button"
-                class="podium-close"
-                onclick="cerrarPodio()"
-                aria-label="Cerrar podio"
-            >
-                ×
-            </button>
-
-            <div class="podium-trophy">
-                🏆
-            </div>
-
-            <h2 id="podium-title">
-                ¡Partida finalizada!
-            </h2>
-
-            <p class="podium-modal-subtitle">
-                Estos son los tres mejores jugadores
-            </p>
-
-            <div
-                id="podium-modal-content"
-                class="podium-modal-content"
-            ></div>
-
-            <button
-                type="button"
-                class="podium-continue-button"
-                onclick="cerrarPodio()"
-            >
-                Continuar
-            </button>
-        </section>
-    </div>
-
-
-    <!-- =====================================================
-         CONTENIDO PRINCIPAL
-    ====================================================== -->
-
     <main class="container">
         <header class="page-header">
             <div class="brand">
@@ -115,7 +55,8 @@
                     <h1>Semantle NLP</h1>
 
                     <p class="subtitle">
-                        Encuentra la palabra más cercana
+                        Adivina la palabra secreta
+                        usando el significado
                     </p>
                 </div>
             </div>
@@ -123,81 +64,231 @@
 
 
         <!-- =================================================
-             FORMULARIO PARA UNIRSE
+             PANTALLA DE INICIO
         ================================================== -->
 
-        <section
-            id="join-panel"
-            class="card auth-card"
-        >
-            <div class="panel-title">
-                <div class="panel-title-icon">
-                    🚀
+        <section id="home-panel">
+            <div class="mode-grid">
+                <button
+                    type="button"
+                    id="solo-button"
+                    class="mode-card mode-card-solo"
+                >
+                    <span class="mode-icon">
+                        🎮
+                    </span>
+
+                    <span class="mode-name">
+                        Jugar solo
+                    </span>
+
+                    <span class="mode-detail">
+                        Empieza ahora mismo,
+                        sin códigos ni esperas
+                    </span>
+                </button>
+
+                <div class="mode-card mode-card-join">
+                    <span class="mode-icon">
+                        👥
+                    </span>
+
+                    <span class="mode-name">
+                        Unirse a una sala
+                    </span>
+
+                    <span class="mode-detail">
+                        Juega con tu clase
+                        o tus amigos
+                    </span>
+
+                    <label for="game-code-input">
+                        Código de la sala
+                    </label>
+
+                    <input
+                        id="game-code-input"
+                        type="text"
+                        placeholder="Ejemplo: 278F7E"
+                        maxlength="6"
+                        autocomplete="off"
+                        autocapitalize="characters"
+                    >
+
+                    <label for="player-name">
+                        Tu nombre
+                    </label>
+
+                    <input
+                        id="player-name"
+                        type="text"
+                        placeholder="Escribe tu nombre"
+                        maxlength="30"
+                        autocomplete="off"
+                    >
+
+                    <button
+                        type="button"
+                        id="join-button"
+                    >
+                        Entrar a la partida
+                    </button>
                 </div>
-
-                <h2>Unirse a una sala</h2>
             </div>
-
-            <label for="game-code-input">
-                Código de la sala
-            </label>
-
-            <input
-                id="game-code-input"
-                type="text"
-                placeholder="Ejemplo: 278F7E"
-                maxlength="6"
-            >
-
-            <label for="player-name">
-                Tu nombre
-            </label>
-
-            <input
-                id="player-name"
-                type="text"
-                placeholder="Escribe tu nombre"
-                maxlength="30"
-                onkeydown="
-                    if (event.key === 'Enter') {
-                        unirse();
-                    }
-                "
-            >
-
-            <button
-                type="button"
-                onclick="unirse()"
-            >
-                Entrar a la partida
-            </button>
 
             <p
                 id="join-message"
                 class="message"
             ></p>
+
+            <a href="/laboratorio" class="card lab-card">
+                <div class="lab-head">
+                    <div class="lab-icon">🧪</div>
+
+                    <div>
+                        <h2>Laboratorio de palabras</h2>
+
+                        <p class="lab-sub">
+                            Experimenta con el significado
+                        </p>
+                    </div>
+                </div>
+
+                <div class="lab-demo">
+                    <span class="lab-demo-op">rey</span>
+                    <span class="lab-demo-signo">−</span>
+                    <span class="lab-demo-op">hombre</span>
+                    <span class="lab-demo-signo">+</span>
+                    <span class="lab-demo-op">mujer</span>
+                    <span class="lab-demo-signo">=</span>
+                    <span class="lab-demo-res">reina</span>
+                </div>
+
+                <div class="lab-actividades">
+                    <div class="lab-act">
+                        <span class="lab-act-icon">➕</span>
+                        <span class="lab-act-name">
+                            Suma y resta palabras
+                        </span>
+                    </div>
+
+                    <div class="lab-act">
+                        <span class="lab-act-icon">🕵️</span>
+                        <span class="lab-act-name">
+                            Encuentra al intruso
+                        </span>
+                    </div>
+
+                    <div class="lab-act">
+                        <span class="lab-act-icon">🔭</span>
+                        <span class="lab-act-name">
+                            Explora vecinos
+                        </span>
+                    </div>
+                </div>
+
+                <span class="lab-cta">
+                    Entrar al laboratorio →
+                </span>
+            </a>
+
+            <!-- Explicación del concepto -->
+            <div class="card learn-card">
+                <div class="panel-title">
+                    <div class="panel-title-icon">
+                        🧠
+                    </div>
+
+                    <h2>¿Cómo funciona?</h2>
+                </div>
+
+                <p class="learn-text">
+                    La computadora leyó millones de
+                    textos en español y aprendió qué
+                    palabras aparecen en situaciones
+                    parecidas. Con eso le dio a cada
+                    palabra una lista de
+                    <strong>300 números</strong>,
+                    como si fueran sus coordenadas en
+                    un mapa gigante. Eso se llama
+                    <strong>embedding</strong>.
+                </p>
+
+                <div class="learn-examples">
+                    <div class="learn-example">
+                        <span class="learn-pair">
+                            perro ↔ gato
+                        </span>
+
+                        <span class="learn-verdict good">
+                            Muy cerca
+                        </span>
+
+                        <span class="learn-why">
+                            Los dos son mascotas,
+                            viven en casas y comen
+                            croquetas.
+                        </span>
+                    </div>
+
+                    <div class="learn-example">
+                        <span class="learn-pair">
+                            perro ↔ martillo
+                        </span>
+
+                        <span class="learn-verdict bad">
+                            Muy lejos
+                        </span>
+
+                        <span class="learn-why">
+                            Casi nunca aparecen en
+                            las mismas frases.
+                        </span>
+                    </div>
+                </div>
+
+                <p class="learn-text">
+                    Tu misión: escribir palabras y ver
+                    qué tan cerca están de la secreta.
+                    No importa si se escriben parecido,
+                    importa lo que
+                    <strong>significan</strong>.
+                </p>
+            </div>
         </section>
 
 
         <!-- =================================================
-             PANEL DE JUEGO
+             PANTALLA DE JUEGO
         ================================================== -->
 
         <section
             id="game-panel"
             class="hidden"
         >
-            <!-- Información superior -->
-            <div class="card">
-                <div class="panel-title">
-                    <div class="panel-title-icon">
-                        🎮
-                    </div>
+            <div class="card status-card">
+                <div class="status-row">
+                    <span
+                        id="mode-badge"
+                        class="mode-badge"
+                    >
+                        Solo
+                    </span>
 
-                    <h2>
-                        Sala
-                        <span id="game-code">-</span>
-                    </h2>
+                    <span
+                        id="room-badge"
+                        class="room-badge hidden"
+                    >
+                        Sala <strong id="game-code">-</strong>
+                    </span>
+
+                    <button
+                        type="button"
+                        id="exit-button"
+                        class="link-button"
+                    >
+                        Salir
+                    </button>
                 </div>
 
                 <div class="game-info-grid">
@@ -229,19 +320,6 @@
 
                     <div class="info-item">
                         <span class="info-label">
-                            Estado
-                        </span>
-
-                        <strong
-                            id="game-status"
-                            class="info-value"
-                        >
-                            -
-                        </strong>
-                    </div>
-
-                    <div class="info-item">
-                        <span class="info-label">
                             Tiempo
                         </span>
 
@@ -252,53 +330,66 @@
                             -
                         </strong>
                     </div>
-                </div>
 
-                <div
-                    id="waiting-message"
-                    class="waiting-panel"
-                >
-                    <div class="waiting-icon">
-                        ⏳
-                    </div>
-
-                    <p>
-                        Esperando al administrador.
-                    </p>
-                </div>
-            </div>
-
-
-            <!-- =================================================
-                 ZONA PRINCIPAL DEL JUEGO E INTENTOS
-            ================================================== -->
-
-            <div class="card play-card">
-                <div class="play-card-header">
-                    <div>
-                        <span class="section-kicker">
-                            DESAFÍO ACTUAL
-                        </span>
-
-                        <h2>
-                            Escribe una palabra
-                        </h2>
-                    </div>
-
-                    <div class="attempts-counter">
-                        <span>
+                    <div class="info-item">
+                        <span class="info-label">
                             Intentos
                         </span>
 
                         <strong
                             id="attempts-left"
+                            class="info-value"
                         >
                             5
                         </strong>
                     </div>
                 </div>
 
+                <div
+                    id="waiting-message"
+                    class="waiting-panel hidden"
+                >
+                    <div class="waiting-icon">
+                        ⏳
+                    </div>
 
+                    <p>Esperando al administrador.</p>
+                </div>
+            </div>
+
+
+            <!-- Termómetro -->
+            <div
+                id="thermo-card"
+                class="card thermo-card hidden"
+            >
+                <div class="thermo-header">
+                    <span class="section-kicker">
+                        TU MEJOR INTENTO
+                    </span>
+
+                    <strong id="thermo-word">-</strong>
+                </div>
+
+                <div class="thermo-track">
+                    <div
+                        id="thermo-fill"
+                        class="thermo-fill"
+                    ></div>
+                </div>
+
+                <div class="thermo-footer">
+                    <span id="thermo-label">
+                        Escribe tu primera palabra
+                    </span>
+
+                    <span id="thermo-rank"></span>
+                </div>
+            </div>
+
+
+            <!-- Zona de juego -->
+            <div class="card play-card">
                 <div
                     id="playing-controls"
                     class="hidden"
@@ -308,17 +399,13 @@
                             id="guess-input"
                             type="text"
                             placeholder="Escribe una palabra"
-                            onkeydown="
-                                if (event.key === 'Enter') {
-                                    enviarIntento();
-                                }
-                            "
+                            autocomplete="off"
+                            autocapitalize="none"
                         >
 
                         <button
                             id="guess-button"
                             type="button"
-                            onclick="enviarIntento()"
                         >
                             Probar
                         </button>
@@ -329,56 +416,69 @@
                             id="hint-button"
                             type="button"
                             class="secondary"
-                            onclick="pedirPista()"
                         >
                             💡 Pedir pista
+                            (<span id="hints-left">3</span>)
                         </button>
                     </div>
-
-                    <p
-                        id="game-message"
-                        class="message"
-                    ></p>
                 </div>
 
+                <p
+                    id="game-message"
+                    class="message"
+                ></p>
 
-                <!-- Gráfico / Mapa de cercanía semántica -->
-                <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid rgba(164, 213, 255, 0.15);">
-                    <div class="attempts-title" style="margin-bottom: 10px;">
+                <div
+                    id="hints-list"
+                    class="hints-list"
+                ></div>
+
+
+                <!-- Mapa semántico -->
+                <div class="map-section">
+                    <div class="attempts-title">
                         <div>
-                            <span class="section-kicker">MAPA SEMÁNTICO</span>
-                            <h2>Gráfico de cercanía</h2>
+                            <span class="section-kicker">
+                                MAPA SEMÁNTICO
+                            </span>
+
+                            <h2>Dónde cayeron tus palabras</h2>
                         </div>
                     </div>
-                    <p class="subtitle" style="margin-bottom: 15px; font-size: 13px;">
-                        La palabra secreta se encuentra en el núcleo central (🎯). Las palabras más cercanas aparecen cerca del centro y las lejanas hacia el exterior según su distancia semántica.
+
+                    <p class="subtitle map-help">
+                        El objetivo 🎯 es la palabra
+                        secreta. Cuanto más cerca del
+                        centro, más parecido es el
+                        significado. Las palabras que
+                        se parecen
+                        <em>entre ellas</em> caen en
+                        la misma zona del círculo.
                     </p>
 
-                    <div style="position: relative; width: 100%; aspect-ratio: 1; max-width: 440px; margin: 0 auto; background: rgba(8, 18, 32, 0.75); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-                        <svg id="semantic-svg" viewBox="-1.1 -1.1 2.2 2.2" style="width: 100%; height: 100%;">
-                            <!-- Anillos guía de distancia -->
-                            <circle cx="0" cy="0" r="1.0" fill="none" stroke="rgba(164, 213, 255, 0.1)" stroke-width="0.02" />
+                    <div class="map-frame">
+                        <svg
+                            id="semantic-svg"
+                            viewBox="-1.25 -1.25 2.5 2.5"
+                        >
+                            <circle cx="0" cy="0" r="1.0" fill="none" stroke="rgba(164, 213, 255, 0.10)" stroke-width="0.02" />
                             <circle cx="0" cy="0" r="0.75" fill="none" stroke="rgba(164, 213, 255, 0.08)" stroke-width="0.015" stroke-dasharray="0.03" />
                             <circle cx="0" cy="0" r="0.5" fill="none" stroke="rgba(164, 213, 255, 0.12)" stroke-width="0.02" />
                             <circle cx="0" cy="0" r="0.25" fill="none" stroke="rgba(164, 213, 255, 0.08)" stroke-width="0.015" stroke-dasharray="0.03" />
-                            
-                            <!-- Ejes de referencia -->
-                            <line x1="-1" y1="0" x2="1" y2="0" stroke="rgba(164, 213, 255, 0.08)" stroke-width="0.01" />
-                            <line x1="0" y1="-1" x2="0" y2="1" stroke="rgba(164, 213, 255, 0.08)" stroke-width="0.01" />
 
-                            <!-- Centro / Palabra secreta -->
-                            <circle cx="0" cy="0" r="0.065" fill="var(--cyan)" />
-                            <text x="0" y="-0.09" text-anchor="middle" fill="var(--cyan-light)" font-size="0.085" font-weight="bold">🎯 Objetivo</text>
+                            <line x1="-1" y1="0" x2="1" y2="0" stroke="rgba(164, 213, 255, 0.07)" stroke-width="0.008" />
+                            <line x1="0" y1="-1" x2="0" y2="1" stroke="rgba(164, 213, 255, 0.07)" stroke-width="0.008" />
 
-                            <!-- Grupo dinámico donde se pintarán los intentos -->
                             <g id="svg-attempts"></g>
+
+                            <circle cx="0" cy="0" r="0.06" fill="var(--cyan)" />
+                            <text x="0" y="-0.1" text-anchor="middle" fill="var(--cyan-light)" font-size="0.08" font-weight="bold">🎯 Objetivo</text>
                         </svg>
                     </div>
                 </div>
 
 
-                <!-- Los intentos están inmediatamente
-                     debajo del gráfico -->
+                <!-- Historial -->
                 <div class="attempts-section">
                     <div class="attempts-title">
                         <div>
@@ -386,9 +486,7 @@
                                 HISTORIAL
                             </span>
 
-                            <h2>
-                                Mis intentos
-                            </h2>
+                            <h2>Mis intentos</h2>
                         </div>
 
                         <span
@@ -405,212 +503,264 @@
                                 <tr>
                                     <th>#</th>
                                     <th>Palabra</th>
-                                    <th>Similitud</th>
-                                    <th>Ranking</th>
+                                    <th>Cercanía</th>
+                                    <th>Puesto</th>
                                 </tr>
                             </thead>
 
-                            <tbody
-                                id="attempts-table"
-                            ></tbody>
+                            <tbody id="attempts-table"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
 
-            <!-- =================================================
-                 PROGRESO DEL JUGADOR
-            ================================================== -->
+            <!-- Resultado de la ronda -->
+            <div
+                id="result-card"
+                class="card result-card hidden"
+            >
+                <div
+                    id="result-banner"
+                    class="result-banner"
+                ></div>
 
-            <div class="card progress-card">
-                <div class="panel-title">
-                    <div class="panel-title-icon">
-                        📊
-                    </div>
+                <div
+                    id="neighbors-block"
+                    class="neighbors-block"
+                ></div>
 
-                    <h2>Tu progreso</h2>
-                </div>
+                <div
+                    id="podium-block"
+                    class="podium-block"
+                ></div>
 
-                <div class="progress-grid">
-                    <div class="info-item">
-                        <span class="info-label">
-                            Jugadores conectados
-                        </span>
+                <div class="result-actions">
+                    <button
+                        type="button"
+                        id="replay-button"
+                        class="hidden"
+                    >
+                        🔄 Otra palabra
+                    </button>
 
-                        <strong
-                            id="connected-players"
-                            class="info-value"
-                        >
-                            0/10
-                        </strong>
-                    </div>
-
-                    <div class="info-item">
-                        <span class="info-label">
-                            Intentos restantes
-                        </span>
-
-                        <strong
-                            id="attempts-left-secondary"
-                            class="info-value"
-                        >
-                            5
-                        </strong>
-                    </div>
+                    <button
+                        type="button"
+                        id="home-button"
+                        class="secondary"
+                    >
+                        Volver al inicio
+                    </button>
                 </div>
             </div>
-
-
-            <!-- Podio inferior de respaldo -->
-            <div
-                id="podium-container"
-                class="podium hidden"
-            ></div>
         </section>
     </main>
 
 
     <script>
-        let playerId = localStorage.getItem(
-            "player_id"
-        );
+    (function () {
+        "use strict";
 
-        let podioMostrado = false;
-        let ultimaCuentaRegresiva = null;
+        const $ = (id) => document.getElementById(id);
 
+        const ALMACEN_JUGADOR = "player_id";
 
-        function mostrarJuego() {
-            document
-                .getElementById("join-panel")
-                .classList.add("hidden");
+        let jugadorId = localStorage.getItem(ALMACEN_JUGADOR);
+        let modoActual = "solo";
+        let temporizador = null;
+        let ultimaCuenta = null;
+        // null = "aún no pintado". No se usa "" porque esa es la firma
+        // legítima de una lista vacía: si al reiniciar una ronda se
+        // igualaran, el repintado se saltaría y quedaría en pantalla el
+        // contenido de la ronda anterior.
+        let firmaIntentos = null;
+        let firmaPistas = null;
+        let rondaPintada = null;
+        let estadoPrevio = null;
+        let enviando = false;
 
-            document
-                .getElementById("game-panel")
-                .classList.remove("hidden");
+        // El servidor manda los segundos restantes una vez por consulta. Entre
+        // consulta y consulta descontamos en el navegador para que el reloj no
+        // se vea a saltos.
+        let segundosLocales = 0;
+        let marcaSegundos = 0;
 
-            cargarEstado();
+        function escapar(texto) {
+            const div = document.createElement("div");
+            div.textContent = texto == null ? "" : String(texto);
+            return div.innerHTML;
         }
 
-        function volverAUnirse(mensaje) {
-            localStorage.removeItem("player_id");
-            playerId = null;
-
-            document.getElementById("game-panel").classList.add("hidden");
-            document.getElementById("join-panel").classList.remove("hidden");
-
-            if (mensaje) {
-                document.getElementById("join-message").textContent = mensaje;
+        function mostrar(elemento, visible) {
+            if (elemento) {
+                elemento.classList.toggle("hidden", !visible);
             }
         }
 
+        // ----------------------------------------------------
+        // NAVEGACIÓN ENTRE PANTALLAS
+        // ----------------------------------------------------
 
-        async function unirse() {
-            const codigo = document
-                .getElementById(
-                    "game-code-input"
-                )
-                .value
-                .trim()
-                .toUpperCase();
+        // Deja la pantalla de juego como recién abierta.
+        //
+        // Hace falta al entrar a CUALQUIER partida: en un stand el siguiente
+        // niño usa el mismo navegador, y si no se limpia ve los intentos, el
+        // mapa y el mensaje final del anterior, que incluso le revelaría la
+        // palabra secreta que acaba de tocar.
+        function limpiarPantallaJuego() {
+            detenerTemporizador();
 
-            const nombre = document
-                .getElementById(
-                    "player-name"
-                )
-                .value
-                .trim();
+            estadoPrevio = null;
+            firmaIntentos = null;
+            firmaPistas = null;
+            rondaPintada = null;
+            ultimaCuenta = null;
 
-            const mensaje = document
-                .getElementById(
-                    "join-message"
-                );
+            $("game-message").textContent = "";
+            $("game-message").className = "message";
 
-            if (!codigo || !nombre) {
-                mensaje.textContent =
-                    "Escribe el código y tu nombre.";
+            $("hints-list").innerHTML = "";
+            $("attempts-table").innerHTML = "";
+            $("svg-attempts").innerHTML = "";
+            $("attempts-label").textContent = "0 intentos";
 
-                return;
-            }
+            $("neighbors-block").innerHTML = "";
+            $("podium-block").innerHTML = "";
+            $("result-banner").innerHTML = "";
 
-            mensaje.textContent =
-                "Conectando a la sala...";
+            mostrar($("result-card"), false);
+            mostrar($("thermo-card"), false);
+            mostrar($("countdown-overlay"), false);
+            mostrar($("waiting-message"), false);
+            mostrar($("playing-controls"), false);
+
+            $("guess-input").value = "";
+
+            // Estos se sobrescriben en la primera consulta, pero hasta que
+            // llegue la respuesta se vería el nombre y el tiempo del anterior.
+            $("player-display").textContent = "-";
+            $("category-display").textContent = "-";
+            $("time-display").textContent = "-";
+            $("time-display").classList.remove("time-low");
+        }
+
+        function irAJuego() {
+            limpiarPantallaJuego();
+
+            mostrar($("home-panel"), false);
+            mostrar($("game-panel"), true);
+
+            consultarEstado();
+        }
+
+        function irAInicio(mensaje) {
+            limpiarPantallaJuego();
+
+            localStorage.removeItem(ALMACEN_JUGADOR);
+            jugadorId = null;
+
+            mostrar($("game-panel"), false);
+            mostrar($("home-panel"), true);
+
+            $("join-message").textContent = mensaje || "";
+        }
+
+        // ----------------------------------------------------
+        // ENTRADA AL JUEGO
+        // ----------------------------------------------------
+
+        async function jugarSolo() {
+            const boton = $("solo-button");
+            boton.disabled = true;
+
+            $("join-message").textContent = "Preparando tu partida...";
 
             try {
-                const respuesta = await fetch(
-                    "/api/partida/unirse",
-                    {
-                        method: "POST",
+                const respuesta = await fetch("/api/solo/nueva", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ nombre: "Jugador" })
+                });
 
-                        headers: {
-                            "Content-Type":
-                                "application/json"
-                        },
-
-                        body: JSON.stringify({
-                            codigo: codigo,
-                            nombre: nombre
-                        })
-                    }
-                );
-
-                const datos =
-                    await respuesta.json();
+                const datos = await respuesta.json();
 
                 if (!respuesta.ok) {
-                    mensaje.textContent =
-                        datos.detail ||
-                        "No se pudo unir a la sala.";
-
+                    $("join-message").textContent =
+                        datos.detail || "No se pudo crear la partida.";
                     return;
                 }
 
-                playerId =
-                    datos.jugador_id;
+                jugadorId = datos.jugador_id;
+                modoActual = "solo";
+                localStorage.setItem(ALMACEN_JUGADOR, jugadorId);
 
-                localStorage.setItem(
-                    "player_id",
-                    playerId
-                );
-
-                document
-                    .getElementById(
-                        "game-code"
-                    )
-                    .textContent =
-                    datos.codigo;
-
-                document
-                    .getElementById(
-                        "player-display"
-                    )
-                    .textContent =
-                    datos.nombre;
-
-                mostrarJuego();
+                $("join-message").textContent = "";
+                irAJuego();
             } catch (error) {
-                console.error(error);
-
-                mensaje.textContent =
+                $("join-message").textContent =
                     "No se pudo conectar con el servidor.";
+            } finally {
+                boton.disabled = false;
             }
         }
 
+        async function unirse() {
+            const codigo = $("game-code-input").value.trim().toUpperCase();
+            const nombre = $("player-name").value.trim();
+            const mensaje = $("join-message");
 
-        async function cargarEstado() {
-            if (!playerId) {
+            if (!codigo || !nombre) {
+                mensaje.textContent = "Escribe el código y tu nombre.";
+                return;
+            }
+
+            mensaje.textContent = "Conectando a la sala...";
+
+            try {
+                const respuesta = await fetch("/api/partida/unirse", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ codigo: codigo, nombre: nombre })
+                });
+
+                const datos = await respuesta.json();
+
+                if (!respuesta.ok) {
+                    mensaje.textContent =
+                        datos.detail || "No se pudo unir a la sala.";
+                    return;
+                }
+
+                jugadorId = datos.jugador_id;
+                modoActual = datos.modo;
+                localStorage.setItem(ALMACEN_JUGADOR, jugadorId);
+
+                mensaje.textContent = "";
+                irAJuego();
+            } catch (error) {
+                mensaje.textContent = "No se pudo conectar con el servidor.";
+            }
+        }
+
+        // ----------------------------------------------------
+        // CONSULTA DE ESTADO
+        // ----------------------------------------------------
+
+        async function consultarEstado() {
+            if (!jugadorId) {
                 return;
             }
 
             try {
                 const respuesta = await fetch(
                     "/api/partida/estado?jugador_id=" +
-                    encodeURIComponent(playerId)
+                    encodeURIComponent(jugadorId)
                 );
 
                 if (respuesta.status === 404) {
-                    volverAUnirse(
-                        "Tu sesión anterior ya no es válida. Ingresa el código de la sala nuevamente."
+                    irAInicio(
+                        "Tu partida anterior ya terminó. " +
+                        "Empieza una nueva."
                     );
                     return;
                 }
@@ -618,913 +768,598 @@
                 const datos = await respuesta.json();
 
                 if (!respuesta.ok) {
-                    const mensaje = document.getElementById("game-message");
-                    if (mensaje) {
-                        mensaje.textContent =
-                            datos.detail || "No se pudo consultar la sala.";
-                    }
                     return;
                 }
 
-                mostrarEstado(datos);
+                pintarEstado(datos);
             } catch (error) {
-                console.error(error);
+                /* Un fallo puntual de red no debe romper la partida. */
+            }
+        }
 
-                const mensaje = document.getElementById("game-message");
-                if (mensaje) {
-                    mensaje.textContent = "No se pudo conectar con el servidor.";
+        function programarConsulta() {
+            // Consultamos seguido solo cuando algo se mueve. Si la ronda
+            // terminó o el jugador cambió de pestaña, bajamos el ritmo para no
+            // gastar batería ni saturar el servidor.
+            let espera = 1000;
+
+            if (document.hidden) {
+                espera = 5000;
+            } else if (estadoPrevio) {
+                const estado = estadoPrevio.estado;
+
+                if (estado === "FINALIZADA") {
+                    espera = 3000;
+                } else if (estado === "ESPERANDO_JUGADORES") {
+                    espera = 2000;
                 }
             }
-        }
 
-
-        function mostrarCuentaRegresiva(
-            numero
-        ) {
-            const overlay =
-                document.getElementById(
-                    "countdown-overlay"
-                );
-
-            const elemento =
-                document.getElementById(
-                    "countdown-number"
-                );
-
-            if (!overlay || !elemento) {
-                return;
-            }
-
-            if (!numero || numero <= 0) {
-                overlay.classList.add(
-                    "hidden"
-                );
-
-                ultimaCuentaRegresiva = null;
-
-                return;
-            }
-
-            if (
-                ultimaCuentaRegresiva === numero
-            ) {
-                return;
-            }
-
-            ultimaCuentaRegresiva = numero;
-
-            elemento.textContent =
-                numero;
-
-            elemento.classList.remove(
-                "countdown-3",
-                "countdown-2",
-                "countdown-1"
-            );
-
-            elemento.classList.add(
-                "countdown-" + numero
-            );
-
-            overlay.classList.remove(
-                "hidden"
-            );
-
-            elemento.style.animation =
-                "none";
-
-            void elemento.offsetWidth;
-
-            elemento.style.animation =
-                "countdown-pop 0.85s ease-in-out";
-        }
-
-
-        function cerrarPodio() {
-            const modal =
-                document.getElementById(
-                    "podium-modal"
-                );
-
-            if (!modal) {
-                return;
-            }
-
-            modal.classList.add(
-                "hidden"
-            );
-
-            document.body.classList.remove(
-                "modal-open"
-            );
-        }
-
-
-        function reiniciarPodioVisual() {
-            podioMostrado = false;
-
-            cerrarPodio();
-
-            const contenedor =
-                document.getElementById(
-                    "podium-container"
-                );
-
-            if (contenedor) {
-                contenedor.innerHTML = "";
-
-                contenedor.classList.add(
-                    "hidden"
-                );
-            }
-        }
-
-
-        function mostrarPodioEmergente(
-            podio
-        ) {
-            const modal =
-                document.getElementById(
-                    "podium-modal"
-                );
-
-            const contenido =
-                document.getElementById(
-                    "podium-modal-content"
-                );
-
-            if (!modal || !contenido) {
-                return;
-            }
-
-            const primeros =
-                (podio || []).slice(0, 3);
-
-            if (!primeros.length) {
-                contenido.innerHTML = `
-                    <div class="podium-empty">
-                        No hay resultados disponibles.
-                    </div>
-                `;
-
-                modal.classList.remove(
-                    "hidden"
-                );
-
-                document.body.classList.add(
-                    "modal-open"
-                );
-
-                return;
-            }
-
-            contenido.innerHTML =
-                primeros.map(
-                    (jugador, indice) => {
-                        const posicion =
-                            indice + 1;
-
-                        let medalla = "🏅";
-
-                        if (posicion === 1) {
-                            medalla = "🥇";
-                        } else if (
-                            posicion === 2
-                        ) {
-                            medalla = "🥈";
-                        } else if (
-                            posicion === 3
-                        ) {
-                            medalla = "🥉";
-                        }
-
-                        const tiempo =
-                            jugador
-                                .tiempo_segundos !==
-                                null &&
-                            jugador
-                                .tiempo_segundos !==
-                                undefined
-                                ? jugador
-                                    .tiempo_segundos +
-                                  " segundos"
-                                : "No acertó";
-
-                        const resultado =
-                            jugador.gano
-                                ? "Palabra encontrada"
-                                : "No encontró la palabra";
-
-                        return `
-                            <article
-                                class="
-                                    podium-place
-                                    podium-place-${posicion}
-                                "
-                            >
-                                <div
-                                    class="podium-medal"
-                                >
-                                    ${medalla}
-                                </div>
-
-                                <div
-                                    class="podium-position"
-                                >
-                                    ${posicion}° lugar
-                                </div>
-
-                                <div
-                                    class="
-                                        podium-player-name
-                                    "
-                                >
-                                    ${jugador.nombre}
-                                </div>
-
-                                <div
-                                    class="
-                                        podium-player-info
-                                    "
-                                >
-                                    ${jugador.intentos}
-                                    intento(s)
-                                </div>
-
-                                <div
-                                    class="
-                                        podium-player-time
-                                    "
-                                >
-                                    ${tiempo}
-                                </div>
-
-                                <div
-                                    class="
-                                        podium-player-result
-                                    "
-                                >
-                                    ${resultado}
-                                </div>
-                            </article>
-                        `;
-                    }
-                ).join("");
-
-            modal.classList.remove(
-                "hidden"
-            );
-
-            document.body.classList.add(
-                "modal-open"
-            );
-        }
-
-
-        function mostrarEstado(datos) {
-            if (
-                datos.estado ===
-                "INICIANDO"
-            ) {
-                mostrarCuentaRegresiva(
-                    datos.cuenta_regresiva
-                );
-            } else {
-                mostrarCuentaRegresiva(0);
-            }
-
-
-            if (
-                datos.estado ===
-                "ESPERANDO_JUGADORES" &&
-                Array.isArray(datos.intentos) &&
-                datos.intentos.length === 0
-            ) {
-                reiniciarPodioVisual();
-            }
-
-
-            document
-                .getElementById(
-                    "game-code"
-                )
-                .textContent =
-                datos.codigo || "-";
-
-            document
-                .getElementById(
-                    "player-display"
-                )
-                .textContent =
-                datos.nombre || "-";
-
-            document
-                .getElementById(
-                    "category-display"
-                )
-                .textContent =
-                datos.categoria || "-";
-
-            const estado =
-                document.getElementById(
-                    "game-status"
-                );
-
-            estado.textContent =
-                datos.estado || "-";
-
-            estado.className =
-                "info-value " +
-                obtenerClaseEstado(
-                    datos.estado
-                );
-
-            document
-                .getElementById(
-                    "connected-players"
-                )
-                .textContent =
-                `${datos.jugadores_conectados}/` +
-                `${datos.max_jugadores}`;
-
-            document
-                .getElementById(
-                    "attempts-left"
-                )
-                .textContent =
-                datos.intentos_restantes;
-
-            document
-                .getElementById(
-                    "attempts-left-secondary"
-                )
-                .textContent =
-                datos.intentos_restantes;
-
-
-            const tiempo =
-                document.getElementById(
-                    "time-display"
-                );
-
-            const espera =
-                document.getElementById(
-                    "waiting-message"
-                );
-
-            const controles =
-                document.getElementById(
-                    "playing-controls"
-                );
-
-            const entrada =
-                document.getElementById(
-                    "guess-input"
-                );
-
-            const botonProbar =
-                document.getElementById(
-                    "guess-button"
-                );
-
-            const botonPista =
-                document.getElementById(
-                    "hint-button"
-                );
-
-            const mensaje =
-                document.getElementById(
-                    "game-message"
-                );
-
-
-            if (
-                datos.estado ===
-                "ESPERANDO_JUGADORES"
-            ) {
-                tiempo.textContent =
-                    "Esperando inicio";
-
-                espera.innerHTML = `
-                    <div class="waiting-icon">
-                        ⏳
-                    </div>
-
-                    <p>
-                        Esperando a que el administrador
-                        inicie la ronda.
-                    </p>
-                `;
-
-                espera.classList.remove(
-                    "hidden"
-                );
-
-                controles.classList.add(
-                    "hidden"
-                );
-
-                entrada.disabled = true;
-                botonProbar.disabled = true;
-                botonPista.disabled = true;
-            } else if (
-                datos.estado ===
-                "INICIANDO"
-            ) {
-                tiempo.textContent =
-                    "Iniciando en " +
-                    datos.cuenta_regresiva +
-                    "...";
-
-                espera.innerHTML = `
-                    <div class="waiting-icon">
-                        🚀
-                    </div>
-
-                    <p>
-                        La ronda comienza en
-                        ${datos.cuenta_regresiva}...
-                    </p>
-                `;
-
-                espera.classList.remove(
-                    "hidden"
-                );
-
-                controles.classList.add(
-                    "hidden"
-                );
-
-                entrada.disabled = true;
-                botonProbar.disabled = true;
-                botonPista.disabled = true;
-            } else if (
-                datos.estado ===
-                "EN_CURSO" &&
-                !datos.gano &&
-                !datos.terminado
-            ) {
-                tiempo.textContent =
-                    datos.segundos_restantes +
-                    " segundos";
-
-                espera.classList.add(
-                    "hidden"
-                );
-
-                controles.classList.remove(
-                    "hidden"
-                );
-
-                entrada.disabled = false;
-                botonProbar.disabled = false;
-                botonPista.disabled = false;
-            } else if (
-                datos.gano &&
-                datos.estado ===
-                "EN_CURSO"
-            ) {
-                tiempo.textContent =
-                    datos.segundos_restantes +
-                    " segundos";
-
-                espera.innerHTML = `
-                    <div class="waiting-icon">
-                        🎉
-                    </div>
-
-                    <p>
-                        ¡Felicitaciones! Ganaste.
-                        Espera a que termine la ronda.
-                    </p>
-                `;
-
-                espera.classList.remove(
-                    "hidden"
-                );
-
-                controles.classList.remove(
-                    "hidden"
-                );
-
-                entrada.disabled = true;
-                botonProbar.disabled = true;
-                botonPista.disabled = true;
-
-                mensaje.textContent =
-                    "Encontraste la palabra secreta.";
-            } else if (
-                datos.estado ===
-                "FINALIZADA"
-            ) {
-                tiempo.textContent =
-                    "Finalizada";
-
-                espera.innerHTML = `
-                    <div class="waiting-icon">
-                        🏆
-                    </div>
-
-                    <p>
-                        La ronda terminó.
-                        Revisa el podio final.
-                    </p>
-                `;
-
-                espera.classList.remove(
-                    "hidden"
-                );
-
-                controles.classList.remove(
-                    "hidden"
-                );
-
-                entrada.disabled = true;
-                botonProbar.disabled = true;
-                botonPista.disabled = true;
-
-                mensaje.textContent =
-                    "La palabra era: " +
-                    datos.palabra_secreta;
-
-                if (
-                    datos.podio &&
-                    !podioMostrado
-                ) {
-                    podioMostrado = true;
-
-                    mostrarPodioEmergente(
-                        datos.podio
-                    );
-
-                    mostrarPodio(
-                        datos.podio
-                    );
+            setTimeout(async () => {
+                if (jugadorId) {
+                    await consultarEstado();
                 }
-            } else {
-                tiempo.textContent =
-                    "Ronda terminada";
+                programarConsulta();
+            }, espera);
+        }
 
-                espera.innerHTML = `
-                    <div class="waiting-icon">
-                        ⏳
-                    </div>
+        // ----------------------------------------------------
+        // RELOJ
+        // ----------------------------------------------------
 
-                    <p>
-                        Ya terminaste.
-                        Espera la siguiente ronda.
-                    </p>
-                `;
-
-                espera.classList.remove(
-                    "hidden"
-                );
-
-                controles.classList.remove(
-                    "hidden"
-                );
-
-                entrada.disabled = true;
-                botonProbar.disabled = true;
-                botonPista.disabled = true;
-            }
-
-            if (datos.gano) {
-                mensaje.textContent =
-                    "¡Felicitaciones! Ganaste.";
-            }
-
-            mostrarIntentos(
-                datos.intentos || []
-            );
-
-            if (
-                datos.estado !==
-                "FINALIZADA"
-            ) {
-                const podio =
-                    document.getElementById(
-                        "podium-container"
-                    );
-
-                podio.innerHTML = "";
-
-                podio.classList.add(
-                    "hidden"
-                );
+        function detenerTemporizador() {
+            if (temporizador) {
+                clearInterval(temporizador);
+                temporizador = null;
             }
         }
 
+        function sincronizarReloj(segundos) {
+            segundosLocales = segundos;
+            marcaSegundos = Date.now();
+        }
 
-        function obtenerClaseEstado(
-            estado
-        ) {
-            if (estado === "INICIANDO") {
-                return "status-starting";
+        function pintarReloj() {
+            const elemento = $("time-display");
+
+            if (!elemento || !estadoPrevio) {
+                return;
             }
 
-            if (estado === "EN_CURSO") {
-                return "status-playing";
+            const estado = estadoPrevio.estado;
+
+            if (estado === "ESPERANDO_JUGADORES") {
+                elemento.textContent = "Esperando";
+                return;
             }
 
             if (estado === "FINALIZADA") {
-                return "status-finished";
+                elemento.textContent = "Terminada";
+                return;
             }
 
-            return "status-waiting";
+            const transcurrido = (Date.now() - marcaSegundos) / 1000;
+            const restante = Math.max(0, Math.ceil(segundosLocales - transcurrido));
+
+            elemento.textContent = restante + " s";
+            elemento.classList.toggle("time-low", restante <= 15);
         }
 
+        // ----------------------------------------------------
+        // CUENTA REGRESIVA
+        // ----------------------------------------------------
 
-        function actualizarGrafico(intentos) {
-            const svgGrupo = document.getElementById("svg-attempts");
-            if (!svgGrupo) return;
+        function pintarCuentaRegresiva(numero) {
+            const overlay = $("countdown-overlay");
+            const elemento = $("countdown-number");
 
-            svgGrupo.innerHTML = "";
+            if (!numero || numero <= 0) {
+                mostrar(overlay, false);
+                ultimaCuenta = null;
+                return;
+            }
 
-            if (!intentos || !intentos.length) return;
+            if (ultimaCuenta === numero) {
+                return;
+            }
 
-            intentos.forEach(intento => {
-                const x = intento.x !== undefined ? intento.x : 0;
-                const y = intento.y !== undefined ? intento.y : 0;
-                const color = intento.color || "#55d6ff";
-                const palabra = intento.palabra || "";
-                const puesto = intento.puesto || "";
-                const similitud = intento.similitud || 0;
+            ultimaCuenta = numero;
+            elemento.textContent = numero;
 
-                const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            elemento.classList.remove(
+                "countdown-3", "countdown-2", "countdown-1"
+            );
+            elemento.classList.add("countdown-" + numero);
 
-                // Círculo del intento
-                const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-                circle.setAttribute("cx", x);
-                circle.setAttribute("cy", y);
-                circle.setAttribute("r", "0.045");
-                circle.setAttribute("fill", color);
-                circle.setAttribute("stroke", "#08111f");
-                circle.setAttribute("stroke-width", "0.01");
+            mostrar(overlay, true);
 
-                // Etiqueta con el texto de la palabra
-                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                text.setAttribute("x", x);
-                text.setAttribute("y", y + 0.07);
-                text.setAttribute("text-anchor", "middle");
-                text.setAttribute("fill", "#f4f8ff");
-                text.setAttribute("font-size", "0.065");
-                text.setAttribute("font-weight", "600");
-                text.textContent = palabra;
-
-                // Tooltip interactivo nativo al pasar el cursor
-                const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
-                title.textContent = `${palabra} — Puesto #${puesto} (Similitud: ${similitud})`;
-                circle.appendChild(title);
-
-                g.appendChild(circle);
-                g.appendChild(text);
-                svgGrupo.appendChild(g);
-            });
+            elemento.style.animation = "none";
+            void elemento.offsetWidth;
+            elemento.style.animation = "countdown-pop 0.85s ease-in-out";
         }
 
+        // ----------------------------------------------------
+        // PINTADO PRINCIPAL
+        // ----------------------------------------------------
 
-        function mostrarIntentos(
-            intentos
-        ) {
-            const tabla =
-                document.getElementById(
-                    "attempts-table"
-                );
+        function pintarEstado(datos) {
+            estadoPrevio = datos;
+            modoActual = datos.modo;
 
-            const etiqueta =
-                document.getElementById(
-                    "attempts-label"
-                );
+            // Al empezar una ronda nueva hay que borrar lo de la anterior.
+            // Incluye el caso en que la ronda la reinicia el administrador,
+            // donde el navegador solo se entera por este número.
+            if (rondaPintada !== null &&
+                datos.numero_ronda !== rondaPintada) {
+                firmaIntentos = null;
+                firmaPistas = null;
 
-            tabla.innerHTML = "";
+                $("game-message").textContent = "";
+                $("game-message").className = "message";
+            }
+
+            rondaPintada = datos.numero_ronda;
+
+            const esSolo = datos.modo === "solo";
+            const jugando = datos.estado === "EN_CURSO" &&
+                !datos.gano && !datos.terminado;
+
+            pintarCuentaRegresiva(
+                datos.estado === "INICIANDO" ? datos.cuenta_regresiva : 0
+            );
+
+            $("mode-badge").textContent = esSolo ? "🎮 Solo" : "👥 Sala";
+            mostrar($("room-badge"), !esSolo);
+            $("game-code").textContent = datos.codigo || "-";
+
+            $("player-display").textContent = datos.nombre || "-";
+            $("category-display").textContent = datos.categoria || "-";
+            $("attempts-left").textContent = datos.intentos_restantes;
+            $("hints-left").textContent = datos.pistas_restantes;
+
+            sincronizarReloj(datos.segundos_restantes);
+            pintarReloj();
+
+            if (!temporizador) {
+                temporizador = setInterval(pintarReloj, 250);
+            }
+
+            // Controles
+            mostrar($("playing-controls"), jugando);
+
+            const entrada = $("guess-input");
+            entrada.disabled = !jugando;
+            $("guess-button").disabled = !jugando;
+            $("hint-button").disabled = !jugando || datos.pistas_restantes <= 0;
+
+            // Panel de espera
+            const espera = $("waiting-message");
+
+            if (datos.estado === "ESPERANDO_JUGADORES") {
+                espera.innerHTML =
+                    '<div class="waiting-icon">⏳</div>' +
+                    "<p>Esperando a que el administrador inicie la ronda. " +
+                    "Jugadores conectados: " +
+                    escapar(datos.jugadores_conectados) + "/" +
+                    escapar(datos.max_jugadores) + "</p>";
+                mostrar(espera, true);
+            } else if (datos.gano && datos.estado !== "FINALIZADA") {
+                espera.innerHTML =
+                    '<div class="waiting-icon">🎉</div>' +
+                    "<p>¡Encontraste la palabra! Espera a que " +
+                    "termine la ronda.</p>";
+                mostrar(espera, true);
+            } else if (datos.terminado && datos.estado !== "FINALIZADA") {
+                espera.innerHTML =
+                    '<div class="waiting-icon">⌛</div>' +
+                    "<p>Se acabaron tus intentos. Espera el resultado.</p>";
+                mostrar(espera, true);
+            } else {
+                mostrar(espera, false);
+            }
+
+            pintarIntentos(datos.intentos || []);
+            pintarPistas(datos.pistas || []);
+            pintarTermometro(datos.intentos || []);
+            pintarResultado(datos);
+
+            if (jugando && !document.hidden && document.activeElement === document.body) {
+                entrada.focus();
+            }
+        }
+
+        // ----------------------------------------------------
+        // TERMÓMETRO
+        // ----------------------------------------------------
+
+        function pintarTermometro(intentos) {
+            const tarjeta = $("thermo-card");
+
+            if (!intentos.length) {
+                mostrar(tarjeta, false);
+                return;
+            }
+
+            mostrar(tarjeta, true);
+
+            const mejor = intentos.reduce(
+                (a, b) => (b.temperatura > a.temperatura ? b : a)
+            );
+
+            $("thermo-word").textContent = mejor.palabra;
+            $("thermo-label").textContent = mejor.descripcion;
+            $("thermo-rank").textContent = "Puesto #" + mejor.puesto;
+
+            const relleno = $("thermo-fill");
+            relleno.style.width = Math.max(2, mejor.temperatura) + "%";
+            relleno.style.background = mejor.color;
+        }
+
+        // ----------------------------------------------------
+        // INTENTOS
+        // ----------------------------------------------------
+
+        function pintarIntentos(intentos) {
+            // Volver a dibujar la tabla y el mapa en cada consulta hacía
+            // parpadear la pantalla una vez por segundo. Solo redibujamos si
+            // de verdad cambió algo.
+            const firma = intentos
+                .map((i) => i.palabra + ":" + i.puesto)
+                .join("|");
+
+            if (firma === firmaIntentos) {
+                return;
+            }
+
+            firmaIntentos = firma;
+
+            const tabla = $("attempts-table");
+            const etiqueta = $("attempts-label");
 
             etiqueta.textContent =
                 intentos.length +
-                " intento(s) registrados";
+                (intentos.length === 1 ? " intento" : " intentos");
 
             if (!intentos.length) {
-                tabla.innerHTML = `
-                    <tr>
-                        <td colspan="4">
-                            Todavía no tienes intentos.
-                        </td>
-                    </tr>
-                `;
-                actualizarGrafico([]);
+                tabla.innerHTML =
+                    '<tr><td colspan="4">Todavía no tienes intentos.</td></tr>';
+                pintarMapa([]);
                 return;
             }
 
-            for (
-                const intento of intentos
-            ) {
-                const fila =
-                    document.createElement(
-                        "tr"
-                    );
-
-                fila.innerHTML = `
-                    <td>
-                        ${intento.numero_intento}
-                    </td>
-
-                    <td
-                        style="
-                            color: ${intento.color};
-                            font-weight: 800;
-                        "
-                    >
-                        ${intento.palabra}
-                    </td>
-
-                    <td>
-                        ${intento.similitud}
-                    </td>
-
-                    <td>
-                        #${intento.puesto}
-                    </td>
-                `;
-
-                tabla.appendChild(fila);
-            }
-
-            actualizarGrafico(intentos);
-        }
-
-
-        function mostrarPodio(
-            podio
-        ) {
-            const contenedor =
-                document.getElementById(
-                    "podium-container"
-                );
-
-            if (!podio || !podio.length) {
-                contenedor.innerHTML = "";
-
-                contenedor.classList.add(
-                    "hidden"
-                );
-
-                return;
-            }
-
-            contenedor.innerHTML = `
-                <h2>🏆 Podio final</h2>
-
-                <ol>
-                    ${
-                        podio.slice(0, 3)
-                            .map(
-                                jugador => `
-                                    <li>
-                                        <strong>
-                                            ${jugador.nombre}
-                                        </strong>
-
-                                        — ${jugador.intentos}
-                                        intento(s)
-
-                                        ${
-                                            jugador.gano
-                                                ? " ✅"
-                                                : " ❌"
-                                        }
-
-                                        ${
-                                            jugador.tiempo_segundos !== null
-                                                ? " — " +
-                                                  jugador.tiempo_segundos +
-                                                  " segundos"
-                                                : ""
-                                        }
-                                    </li>
-                                `
-                            )
-                            .join("")
-                    }
-                </ol>
-            `;
-
-            contenedor.classList.remove(
-                "hidden"
+            const mejor = intentos.reduce(
+                (a, b) => (b.temperatura > a.temperatura ? b : a)
             );
+
+            tabla.innerHTML = intentos
+                .map((intento) => {
+                    const destacado =
+                        intento.palabra === mejor.palabra ? " class=\"best-row\"" : "";
+
+                    return (
+                        "<tr" + destacado + ">" +
+                        "<td>" + escapar(intento.numero_intento) + "</td>" +
+                        '<td style="color:' + escapar(intento.color) +
+                        ';font-weight:800">' + escapar(intento.palabra) + "</td>" +
+                        "<td>" +
+                        '<span class="temp-pill" style="background:' +
+                        escapar(intento.color) + '">' +
+                        escapar(intento.temperatura) + "</span> " +
+                        escapar(intento.descripcion) +
+                        "</td>" +
+                        "<td>#" + escapar(intento.puesto) + "</td>" +
+                        "</tr>"
+                    );
+                })
+                .join("");
+
+            pintarMapa(intentos);
         }
 
+        function pintarMapa(intentos) {
+            const grupo = $("svg-attempts");
+            const NS = "http://www.w3.org/2000/svg";
+
+            grupo.innerHTML = "";
+
+            intentos.forEach((intento) => {
+                const x = intento.x || 0;
+                const y = intento.y || 0;
+
+                const nodo = document.createElementNS(NS, "g");
+
+                const linea = document.createElementNS(NS, "line");
+                linea.setAttribute("x1", "0");
+                linea.setAttribute("y1", "0");
+                linea.setAttribute("x2", x);
+                linea.setAttribute("y2", y);
+                linea.setAttribute("stroke", intento.color);
+                linea.setAttribute("stroke-width", "0.006");
+                linea.setAttribute("stroke-opacity", "0.35");
+
+                const punto = document.createElementNS(NS, "circle");
+                punto.setAttribute("cx", x);
+                punto.setAttribute("cy", y);
+                punto.setAttribute("r", "0.042");
+                punto.setAttribute("fill", intento.color);
+                punto.setAttribute("stroke", "#08111f");
+                punto.setAttribute("stroke-width", "0.012");
+
+                const titulo = document.createElementNS(NS, "title");
+                titulo.textContent =
+                    intento.palabra + " — puesto #" + intento.puesto +
+                    " (cercanía " + intento.temperatura + ")";
+                punto.appendChild(titulo);
+
+                const texto = document.createElementNS(NS, "text");
+                texto.setAttribute("x", x);
+                texto.setAttribute("y", y + 0.105);
+                texto.setAttribute("text-anchor", "middle");
+                texto.setAttribute("fill", "#f4f8ff");
+                texto.setAttribute("font-size", "0.068");
+                texto.setAttribute("font-weight", "600");
+                texto.textContent = intento.palabra;
+
+                nodo.appendChild(linea);
+                nodo.appendChild(punto);
+                nodo.appendChild(texto);
+                grupo.appendChild(nodo);
+            });
+        }
+
+        function pintarPistas(pistas) {
+            const firma = pistas.join("|");
+
+            if (firma === firmaPistas) {
+                return;
+            }
+
+            firmaPistas = firma;
+
+            $("hints-list").innerHTML = pistas
+                .map((p) => '<div class="hint-item">💡 ' + escapar(p) + "</div>")
+                .join("");
+        }
+
+        // ----------------------------------------------------
+        // RESULTADO
+        // ----------------------------------------------------
+
+        function pintarResultado(datos) {
+            const tarjeta = $("result-card");
+
+            if (datos.estado !== "FINALIZADA") {
+                mostrar(tarjeta, false);
+                return;
+            }
+
+            mostrar(tarjeta, true);
+            mostrar($("replay-button"), datos.modo === "solo");
+
+            const gano = datos.gano;
+
+            $("result-banner").innerHTML =
+                '<div class="result-icon">' + (gano ? "🎉" : "🔍") + "</div>" +
+                "<h2>" +
+                (gano ? "¡La encontraste!" : "Se acabó la ronda") +
+                "</h2>" +
+                '<p class="result-word">La palabra era <strong>' +
+                escapar(datos.palabra_secreta) + "</strong></p>";
+
+            const vecinos = datos.vecinos || [];
+
+            if (vecinos.length) {
+                $("neighbors-block").innerHTML =
+                    '<div class="panel-title">' +
+                    '<div class="panel-title-icon">🧠</div>' +
+                    "<h2>Lo que la computadora cree parecido a “" +
+                    escapar(datos.palabra_secreta) + "”</h2>" +
+                    "</div>" +
+                    '<p class="learn-text">Ninguna persona le enseñó esto. ' +
+                    "Lo dedujo sola, viendo en qué frases aparece cada " +
+                    "palabra en millones de textos.</p>" +
+                    '<div class="neighbor-grid">' +
+                    vecinos
+                        .map(
+                            (v) =>
+                                '<div class="neighbor-chip">' +
+                                '<span class="neighbor-word">' +
+                                escapar(v.palabra) + "</span>" +
+                                '<span class="neighbor-score">' +
+                                escapar(Math.round(v.similitud * 100)) +
+                                "% parecido</span>" +
+                                "</div>"
+                        )
+                        .join("") +
+                    "</div>";
+            } else {
+                $("neighbors-block").innerHTML = "";
+            }
+
+            const podio = datos.podio || [];
+
+            if (datos.modo !== "solo" && podio.length) {
+                const medallas = ["🥇", "🥈", "🥉"];
+
+                $("podium-block").innerHTML =
+                    '<div class="panel-title">' +
+                    '<div class="panel-title-icon">🏆</div>' +
+                    "<h2>Podio</h2></div>" +
+                    '<div class="podium-row">' +
+                    podio
+                        .map(
+                            (j, i) =>
+                                '<div class="podium-slot">' +
+                                '<span class="podium-medal">' +
+                                medallas[i] + "</span>" +
+                                '<span class="podium-name">' +
+                                escapar(j.nombre) + "</span>" +
+                                '<span class="podium-info">' +
+                                escapar(j.intentos) + " intento(s)" +
+                                (j.gano ? " ✅" : " ❌") + "</span>" +
+                                "</div>"
+                        )
+                        .join("") +
+                    "</div>";
+            } else {
+                $("podium-block").innerHTML = "";
+            }
+        }
+
+        // ----------------------------------------------------
+        // ACCIONES
+        // ----------------------------------------------------
 
         async function enviarIntento() {
-            const entrada =
-                document.getElementById(
-                    "guess-input"
-                );
+            const entrada = $("guess-input");
+            const palabra = entrada.value.trim();
 
-            if (entrada.disabled) {
+            if (!palabra || entrada.disabled || enviando) {
                 return;
             }
 
-            const palabra =
-                entrada.value.trim();
+            enviando = true;
+            $("guess-button").disabled = true;
 
-            if (!palabra) {
-                return;
-            }
-
-            const respuesta = await fetch(
-                "/api/partida/intento",
-                {
+            try {
+                const respuesta = await fetch("/api/partida/intento", {
                     method: "POST",
-
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
-
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        jugador_id: playerId,
+                        jugador_id: jugadorId,
                         palabra: palabra
                     })
+                });
+
+                const datos = await respuesta.json();
+                const mensaje = $("game-message");
+
+                if (!respuesta.ok) {
+                    mensaje.textContent =
+                        datos.detail || "No se pudo registrar el intento.";
+                    mensaje.className = "message message-error";
+                    return;
                 }
-            );
 
-            const datos =
-                await respuesta.json();
+                entrada.value = "";
 
-            const mensaje =
-                document.getElementById(
-                    "game-message"
-                );
+                mensaje.textContent = datos.es_correcta
+                    ? "¡Correcto! Era “" + datos.palabra + "”."
+                    : datos.descripcion + " — “" + datos.palabra +
+                      "” quedó en el puesto #" + datos.puesto + ".";
 
-            if (!respuesta.ok) {
-                mensaje.textContent =
-                    datos.detail ||
-                    "No se pudo registrar el intento.";
+                mensaje.className = "message message-ok";
 
-                return;
+                // Mostramos el resultado de una vez, sin esperar la próxima
+                // consulta al servidor.
+                await consultarEstado();
+            } catch (error) {
+                $("game-message").textContent =
+                    "No se pudo conectar con el servidor.";
+            } finally {
+                enviando = false;
+                const jugando = estadoPrevio &&
+                    estadoPrevio.estado === "EN_CURSO" &&
+                    !estadoPrevio.terminado;
+                $("guess-button").disabled = !jugando;
+                entrada.focus();
             }
-
-            entrada.value = "";
-
-            if (datos.es_correcta) {
-                mensaje.textContent =
-                    "¡Felicitaciones! Ganaste. " +
-                    "Espera a que termine la ronda.";
-            } else {
-                mensaje.textContent =
-                    "Tu palabra quedó en el puesto #" +
-                    datos.puesto +
-                    ".";
-            }
-
-            cargarEstado();
         }
-
 
         async function pedirPista() {
-            const respuesta = await fetch(
-                "/api/partida/pista",
-                {
+            const boton = $("hint-button");
+            boton.disabled = true;
+
+            try {
+                const respuesta = await fetch("/api/partida/pista", {
                     method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ jugador_id: jugadorId })
+                });
 
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
+                const datos = await respuesta.json();
 
-                    body: JSON.stringify({
-                        jugador_id: playerId
-                    })
+                if (!respuesta.ok) {
+                    $("game-message").textContent =
+                        datos.detail || "No se pudo obtener la pista.";
+                    $("game-message").className = "message message-error";
+                    return;
                 }
-            );
 
-            const datos =
-                await respuesta.json();
-
-            document
-                .getElementById(
-                    "game-message"
-                )
-                .textContent =
-                datos.pista ||
-                datos.detail ||
-                "No se pudo obtener la pista.";
+                await consultarEstado();
+            } catch (error) {
+                $("game-message").textContent =
+                    "No se pudo conectar con el servidor.";
+            }
         }
 
+        async function otraPalabra() {
+            const boton = $("replay-button");
+            boton.disabled = true;
 
-        if (playerId) {
-            mostrarJuego();
+            try {
+                const respuesta = await fetch("/api/solo/revancha", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ jugador_id: jugadorId })
+                });
+
+                if (!respuesta.ok) {
+                    irAInicio("Empieza una partida nueva.");
+                    return;
+                }
+
+                const datos = await respuesta.json();
+
+                limpiarPantallaJuego();
+                pintarEstado(datos);
+            } finally {
+                boton.disabled = false;
+            }
         }
 
+        // ----------------------------------------------------
+        // EVENTOS
+        // ----------------------------------------------------
 
-        setInterval(
-            () => {
-                if (playerId) {
-                    cargarEstado();
-                }
-            },
-            1000
-        );
+        $("solo-button").addEventListener("click", jugarSolo);
+        $("join-button").addEventListener("click", unirse);
+        $("guess-button").addEventListener("click", enviarIntento);
+        $("hint-button").addEventListener("click", pedirPista);
+        $("replay-button").addEventListener("click", otraPalabra);
+        $("home-button").addEventListener("click", () => irAInicio(""));
+        $("exit-button").addEventListener("click", () => irAInicio(""));
+
+        $("guess-input").addEventListener("keydown", (evento) => {
+            if (evento.key === "Enter") {
+                enviarIntento();
+            }
+        });
+
+        $("player-name").addEventListener("keydown", (evento) => {
+            if (evento.key === "Enter") {
+                unirse();
+            }
+        });
+
+        $("game-code-input").addEventListener("keydown", (evento) => {
+            if (evento.key === "Enter") {
+                $("player-name").focus();
+            }
+        });
+
+        document.addEventListener("visibilitychange", () => {
+            if (!document.hidden && jugadorId) {
+                consultarEstado();
+            }
+        });
+
+        if (jugadorId) {
+            irAJuego();
+        }
+
+        programarConsulta();
+    })();
     </script>
 </body>
 </html>
