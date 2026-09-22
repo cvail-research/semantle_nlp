@@ -896,9 +896,24 @@ def crear_nueva_ronda(
 def estado_partida_admin(
     _: bool = Depends(verificar_admin),
 ):
-    partida = obtener_partida()
+    if partida_actual is None:
+        return {
+            "activa": False,
+            "codigo": "",
+            "estado": "SIN_PARTIDA",
+            "numero_ronda": 0,
+            "categoria": "",
+            "palabra_secreta": "",
+            "total_jugadores": 0,
+            "max_jugadores": MAX_JUGADORES,
+            "segundos_restantes": 0,
+            "cuenta_regresiva": 0,
+            "jugadores": [],
+            "historial_rondas": [],
+            "ranking_acumulado": [],
+        }
 
-    return partida.estado_admin()
+    return partida_actual.estado_admin()
 
 
 @app.post("/api/admin/partida/iniciar")
