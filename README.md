@@ -48,10 +48,18 @@ Si solo vas a jugar en tu propia red, puedes saltarte este paso y usar
 winget install --id Cloudflare.cloudflared
 ```
 
-**Linux:**
-```
+**Linux (Debian/Ubuntu):**
+
+```bash
 curl -L --output cloudflared.deb https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
 sudo dpkg -i cloudflared.deb
+```
+
+**Linux (Fedora/RHEL):**
+
+```bash
+sudo dnf config-manager addrepo --from-repofile=https://pkg.cloudflare.com/cloudflared-ascii.repo
+sudo dnf install cloudflared
 ```
 
 **Mac:**
