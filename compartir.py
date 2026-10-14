@@ -21,6 +21,7 @@ import qrcode
 PUERTO = 8000
 URL_LOCAL = f"http://localhost:{PUERTO}"
 ARCHIVO_LOG_TUNEL = "tunel.log"
+ARCHIVO_URL_TUNEL = "tunel_url.txt"
 
 PATRON_URL = re.compile(
     r"https://[a-zA-Z0-9-]+\.trycloudflare\.com"
@@ -164,6 +165,30 @@ def mostrar_qr(url):
     qr.make(fit=True)
     qr.print_ascii(invert=True)
 
+def guardar_url_tunel(url: str | None):
+    """
+    Guarda el enlace público actual para que web_app.py
+    pueda utilizarlo al generar el QR de cada sala.
+    """
+    try:
+        if url:
+            with open(
+                ARCHIVO_URL_TUNEL,
+                "w",
+                encoding="utf-8",
+            ) as archivo:
+                archivo.write(url.rstrip("/"))
+        else:
+            # Elimina un enlace antiguo para no usar un túnel vencido.
+            import os
+
+            if os.path.exists(ARCHIVO_URL_TUNEL):
+                os.remove(ARCHIVO_URL_TUNEL)
+    except OSError as error:
+        print(
+            f"Aviso: no se pudo actualizar "
+            f"{ARCHIVO_URL_TUNEL}: {error}"
+        )
 
 def main():
     # Se usa el intérprete actual en vez de "uv run": así no importa si uv
@@ -193,6 +218,8 @@ def main():
     print("Buscando salida a internet para el QR...")
 
     url_tunel, proceso_tunel, log_tunel = abrir_tunel()
+
+    guardar_url_tunel(url_tunel)
 
     ips = direcciones_locales()
 
@@ -261,6 +288,8 @@ def main():
         if log_tunel is not None:
             log_tunel.close()
 
+        guardar_url_tunel(None)
+        
         proceso_servidor.terminate()
         print("Listo.")
 

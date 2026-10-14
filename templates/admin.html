@@ -272,6 +272,79 @@
                 </p>
             </div>
 
+            <div
+                id="share-room-card"
+                class="share-room-overlay hidden"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="share-room-title"
+            >
+                <div class="share-room-modal">
+                    <button
+                        type="button"
+                        class="share-room-close"
+                        onclick="cerrarQrSala()"
+                        aria-label="Cerrar ventana para compartir sala"
+                    >
+                        ×
+                    </button>
+
+                    <div class="panel-title share-room-title">
+                        <div class="panel-title-icon">
+                            📱
+                        </div>
+
+                        <h2 id="share-room-title">
+                            Sala creada
+                        </h2>
+                    </div>
+
+                    <p class="share-room-description">
+                        Los jugadores deben escanear este código QR
+                        para abrir la página del juego.
+                    </p>
+
+                    <div
+                        id="room-qr"
+                        class="room-qr"
+                        role="img"
+                        aria-label="Código QR para abrir la página del juego"
+                    ></div>
+
+                    <p
+                        id="qr-message"
+                        class="message"
+                    ></p>
+
+                    <div class="room-code-share">
+                        <span>
+                            Código para entrar manualmente:
+                        </span>
+
+                        <strong id="share-room-code">
+                            -
+                        </strong>
+                    </div>
+
+                    <a
+                        id="room-public-link"
+                        class="room-public-link"
+                        href="/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Abrir página del juego
+                    </a>
+
+                    <button
+                        type="button"
+                        class="share-room-continue"
+                        onclick="cerrarQrSala()"
+                    >
+                        Volver al panel
+                    </button>
+                </div>
+            </div>
 
             <div class="card">
                 <div class="panel-title">
@@ -373,7 +446,7 @@
             </div>
         </section>
     </main>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <script>
         let adminToken = localStorage.getItem(
@@ -382,6 +455,7 @@
 
         let categorias = {};
         let ultimaCuentaRegresiva = null;
+        let ventanaCompartir = null;
 
 
         // Los nombres los escriben los jugadores, así que nunca se insertan
@@ -629,16 +703,433 @@
         }
 
 
-        function mostrarMensaje(mensaje) {
-            document
-                .getElementById(
-                    "admin-message"
-                )
-                .textContent = mensaje;
+                function mostrarMensaje(mensaje) {
+                    document
+                        .getElementById(
+                            "admin-message"
+                        )
+                        .textContent = mensaje;
+                }
+                function abrirVentanaCompartir() {
+            const ventana = window.open(
+                "",
+                "semantle_compartir_sala",
+                [
+                    "popup=yes",
+                    "width=600",
+                    "height=780",
+                    "resizable=yes",
+                    "scrollbars=yes"
+                ].join(",")
+            );
+
+            if (!ventana) {
+                mostrarMensaje(
+                    "El navegador bloqueó la ventana emergente. " +
+                    "Permite las ventanas emergentes para este sitio."
+                );
+
+                return null;
+            }
+
+            ventana.document.open();
+
+            ventana.document.write(`
+                <!DOCTYPE html>
+                <html lang="es">
+                <head>
+                    <meta charset="UTF-8">
+
+                    <meta
+                        name="viewport"
+                        content="width=device-width, initial-scale=1.0"
+                    >
+
+                    <title>Compartir sala</title>
+
+                    <style>
+                        :root {
+                            --bg: #08111f;
+                            --card: #14253a;
+                            --cyan: #55d6ff;
+                            --cyan-light: #b7efff;
+                            --yellow: #ffd54f;
+                            --muted: #aabbd0;
+                            --white: #f4f8ff;
+                        }
+
+                        * {
+                            box-sizing: border-box;
+                        }
+
+                        body {
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+
+                            min-width: 100%;
+                            min-height: 100vh;
+
+                            margin: 0;
+                            padding: 20px;
+
+                            background:
+                                radial-gradient(
+                                    circle at 10% 0%,
+                                    rgba(0, 188, 212, 0.2),
+                                    transparent 35%
+                                ),
+                                linear-gradient(
+                                    145deg,
+                                    #07101d,
+                                    #0b1728,
+                                    #07101d
+                                );
+
+                            color: var(--white);
+
+                            font-family:
+                                Inter,
+                                ui-sans-serif,
+                                system-ui,
+                                -apple-system,
+                                BlinkMacSystemFont,
+                                "Segoe UI",
+                                sans-serif;
+                        }
+
+                        .share-card {
+                            width: min(540px, 100%);
+
+                            padding: 30px 24px 26px;
+
+                            border: 1px solid rgba(183, 239, 255, 0.55);
+                            border-radius: 26px;
+
+                            background:
+                                linear-gradient(
+                                    145deg,
+                                    rgba(29, 49, 76, 0.99),
+                                    rgba(10, 24, 42, 0.99)
+                                );
+
+                            box-shadow:
+                                0 0 35px rgba(85, 214, 255, 0.28),
+                                0 25px 90px rgba(0, 0, 0, 0.75);
+
+                            text-align: center;
+                        }
+
+                        h1 {
+                            margin: 0 0 12px;
+
+                            color: var(--cyan-light);
+                            font-size: clamp(26px, 6vw, 38px);
+                        }
+
+                        .description {
+                            margin: 0 auto 22px;
+
+                            color: var(--muted);
+                            line-height: 1.6;
+                        }
+
+                        .qr-box {
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+
+                            width: 250px;
+                            min-height: 250px;
+
+                            margin: 20px auto;
+                            padding: 10px;
+
+                            border: 8px solid white;
+                            border-radius: 15px;
+
+                            background: white;
+                        }
+
+                        .qr-box img {
+                            display: block;
+
+                            width: 230px;
+                            height: 230px;
+                        }
+
+                        .message {
+                            min-height: 24px;
+                            margin: 12px auto;
+
+                            color: var(--yellow);
+                            font-weight: 800;
+                        }
+
+                        .code-box {
+                            width: min(380px, 100%);
+
+                            margin: 20px auto;
+                            padding: 16px;
+
+                            border: 1px solid rgba(85, 214, 255, 0.35);
+                            border-radius: 16px;
+
+                            background: rgba(8, 18, 32, 0.7);
+                        }
+
+                        .code-label {
+                            display: block;
+                            margin-bottom: 8px;
+
+                            color: var(--muted);
+                            font-size: 13px;
+                            font-weight: 800;
+                        }
+
+                        .code {
+                            color: var(--cyan-light);
+
+                            font-size: clamp(34px, 10vw, 52px);
+                            font-weight: 1000;
+                            letter-spacing: 6px;
+                        }
+
+                        .link {
+                            display: inline-block;
+
+                            max-width: 100%;
+                            margin-top: 5px;
+
+                            overflow-wrap: anywhere;
+
+                            color: var(--cyan-light);
+                            font-weight: 800;
+                        }
+
+                        .close-button {
+                            min-height: 46px;
+
+                            margin-top: 22px;
+                            padding: 12px 24px;
+
+                            border: 0;
+                            border-radius: 13px;
+
+                            background:
+                                linear-gradient(
+                                    135deg,
+                                    #4dd6ed,
+                                    #1ea9d2
+                                );
+
+                            color: #03131c;
+                            cursor: pointer;
+
+                            font: inherit;
+                            font-weight: 900;
+                        }
+
+                        .close-button:hover {
+                            filter: brightness(1.12);
+                        }
+
+                        @media (max-width: 600px) {
+                            body {
+                                padding: 12px;
+                            }
+
+                            .share-card {
+                                padding: 24px 15px;
+                                border-radius: 20px;
+                            }
+
+                            .qr-box {
+                                width: 220px;
+                                min-height: 220px;
+                            }
+
+                            .qr-box img {
+                                width: 200px;
+                                height: 200px;
+                            }
+
+                            .code {
+                                letter-spacing: 3px;
+                            }
+                        }
+                    </style>
+                </head>
+
+                <body>
+                    <main class="share-card">
+                        <h1>📱 Sala creada</h1>
+
+                        <p class="description">
+                            Escanea este código QR para abrir la página del juego.
+                        </p>
+
+                        <div
+                            id="popup-room-qr"
+                            class="qr-box"
+                            role="img"
+                            aria-label="Código QR para abrir la página del juego"
+                        ></div>
+
+                        <p
+                            id="popup-message"
+                            class="message"
+                        >
+                            Preparando código QR...
+                        </p>
+
+                        <div class="code-box">
+                            <span class="code-label">
+                                Código para entrar manualmente:
+                            </span>
+
+                            <strong
+                                id="popup-room-code"
+                                class="code"
+                            >
+                                -
+                            </strong>
+                        </div>
+
+                        <a
+                            id="popup-room-link"
+                            class="link"
+                            href="/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Abrir página del juego
+                        </a>
+
+                        <br>
+
+                        <button
+                            type="button"
+                            class="close-button"
+                            onclick="window.close()"
+                        >
+                            Cerrar ventana
+                        </button>
+                    </main>
+                </body>
+                </html>
+            `);
+
+            ventana.document.close();
+
+            return ventana;
         }
 
 
-        async function crearSala() {
+        function llenarVentanaCompartir(
+            ventana,
+            datos
+        ) {
+            if (
+                !ventana ||
+                ventana.closed
+            ) {
+                return;
+            }
+
+            const codigo =
+                String(datos.codigo || "").trim();
+
+            const basePublica =
+                obtenerBasePublica(datos);
+
+            const urlJuego =
+                `${basePublica}/`;
+
+            const codigoElemento =
+                ventana.document.getElementById(
+                    "popup-room-code"
+                );
+
+            const enlace =
+                ventana.document.getElementById(
+                    "popup-room-link"
+                );
+
+            const mensaje =
+                ventana.document.getElementById(
+                    "popup-message"
+                );
+
+            const contenedorQr =
+                ventana.document.getElementById(
+                    "popup-room-qr"
+                );
+
+            if (codigoElemento) {
+                codigoElemento.textContent =
+                    codigo || "-";
+            }
+
+            if (enlace) {
+                enlace.href = urlJuego;
+            }
+
+            if (mensaje) {
+                if (datos.url_publica) {
+                    mensaje.textContent =
+                        "Este QR utiliza el túnel público de Cloudflare activo.";
+                } else {
+                    mensaje.textContent =
+                        "No hay túnel de Cloudflare activo. " +
+                        "El QR usa la dirección actual.";
+                }
+            }
+
+            if (
+                contenedorQr &&
+                typeof QRCode !== "undefined"
+            ) {
+                contenedorQr.innerHTML = "";
+
+                new QRCode(
+                    contenedorQr,
+                    {
+                        text: urlJuego,
+                        width: 230,
+                        height: 230,
+                        colorDark: "#08111f",
+                        colorLight: "#ffffff",
+                        correctLevel: QRCode.CorrectLevel.H
+                    }
+                );
+            }
+        }
+
+
+        function mostrarErrorVentanaCompartir(
+            ventana,
+            mensajeTexto
+        ) {
+            if (
+                !ventana ||
+                ventana.closed
+            ) {
+                return;
+            }
+
+            const mensaje =
+                ventana.document.getElementById(
+                    "popup-message"
+                );
+
+            if (mensaje) {
+                mensaje.textContent =
+                    mensajeTexto;
+            }
+        }
+
+                async function crearSala() {
             const datos =
                 obtenerDatosRonda();
 
@@ -653,6 +1144,13 @@
                 return;
             }
 
+            /*
+            * La ventana se abre antes del fetch.
+            * Así el navegador no la bloquea como ventana emergente.
+            */
+            ventanaCompartir =
+                abrirVentanaCompartir();
+
             try {
                 const estado =
                     await peticionAdmin(
@@ -663,13 +1161,30 @@
                         }
                     );
 
-                mostrarEstado(estado);
+                /*
+                * Actualiza los datos del panel principal,
+                * pero ya no abre la modal interna.
+                */
+                mostrarEstado(
+                    estado,
+                    false
+                );
+
+                llenarVentanaCompartir(
+                    ventanaCompartir,
+                    estado
+                );
 
                 mostrarMensaje(
                     "Sala creada correctamente."
                 );
             } catch (error) {
                 mostrarMensaje(error.message);
+
+                mostrarErrorVentanaCompartir(
+                    ventanaCompartir,
+                    error.message
+                );
             }
         }
 
@@ -859,9 +1374,114 @@
 
             return "status-waiting";
         }
+        function obtenerBasePublica(datos) {
+    const urlConfigurada =
+        String(datos.url_publica || "").trim();
+
+    if (urlConfigurada) {
+        return urlConfigurada.replace(/\/+$/, "");
+    }
+
+    // Respaldo para cuando no hay túnel de Cloudflare.
+    return window.location.origin;
+}
 
 
-        function mostrarEstado(datos) {
+        function mostrarQrSala(
+            datos,
+            abrirVentana = false
+        ) {
+            const tarjeta =
+                document.getElementById("share-room-card");
+
+            const contenedorQr =
+                document.getElementById("room-qr");
+
+            const codigo =
+                String(datos.codigo || "").trim();
+
+            const mensaje =
+                document.getElementById("qr-message");
+
+            const enlace =
+                document.getElementById("room-public-link");
+
+            const codigoCompartir =
+                document.getElementById("share-room-code");
+
+            if (!tarjeta || !contenedorQr) {
+                return;
+            }
+
+            if (!codigo) {
+                tarjeta.classList.add("hidden");
+                return;
+            }
+
+            const basePublica =
+                obtenerBasePublica(datos);
+
+            const urlJuego =
+                `${basePublica}/`;
+
+            contenedorQr.innerHTML = "";
+
+            codigoCompartir.textContent = codigo;
+
+            enlace.href = urlJuego;
+
+            enlace.textContent =
+                `Abrir página del juego`;
+
+            if (typeof QRCode === "undefined") {
+                mensaje.textContent =
+                    "No se pudo cargar el generador del QR. " +
+                    `Abre manualmente: ${urlJuego}`;
+
+                if (abrirVentana) {
+                    tarjeta.classList.remove("hidden");
+                }
+
+                return;
+            }
+
+            new QRCode(contenedorQr, {
+                text: urlJuego,
+                width: 230,
+                height: 230,
+                colorDark: "#08111f",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            if (datos.url_publica) {
+                mensaje.textContent =
+                    "Este QR utiliza el túnel público de Cloudflare activo.";
+            } else {
+                mensaje.textContent =
+                    "No hay túnel de Cloudflare activo. " +
+                    "El QR usa la dirección actual de la página.";
+            }
+
+            if (abrirVentana) {
+                tarjeta.classList.remove("hidden");
+            }
+        }
+        function cerrarQrSala() {
+            const ventana =
+                document.getElementById("share-room-card");
+
+            if (!ventana) {
+                return;
+            }
+
+            ventana.classList.add("hidden");
+        }
+
+        function mostrarEstado(
+                datos,
+                abrirVentanaQr = false
+            )  {
             if (datos.estado === "INICIANDO") {
                 mostrarCuentaRegresiva(
                     datos.cuenta_regresiva
@@ -874,6 +1494,11 @@
                 .getElementById("game-code")
                 .textContent =
                 datos.codigo || "-";
+            
+            mostrarQrSala(
+                datos,
+                false
+            );  
 
             document
                 .getElementById("round-number")

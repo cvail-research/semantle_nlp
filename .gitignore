@@ -27,3 +27,4 @@ wheels/
 
 # Registro del túnel de cloudflared
 tunel.log
+tunel_url.txt

@@ -982,6 +982,7 @@ tr:hover td {
         width: min(94%, 570px);
         padding-top: 15px;
     }
+    
 
     .card {
         border-radius: 19px;
@@ -1061,6 +1062,19 @@ tr:hover td {
     .podium-modal-card {
         padding: 30px 16px 20px;
         border-radius: 22px;
+    }
+    .room-qr {
+    width: 220px;
+    min-height: 220px;
+    }
+
+    .room-qr img {
+        width: 200px;
+        height: 200px;
+    }
+
+    .room-code-share strong {
+        letter-spacing: 3px;
     }
 }
 
@@ -2117,4 +2131,311 @@ tr.best-row {
 
 .lab-card:hover .lab-cta {
     background: rgba(183, 148, 255, 0.32);
+}
+/* ============================================================
+   COMPARTIR SALA CON QR
+============================================================ */
+
+.share-room-card {
+    text-align: center;
+}
+
+.share-room-description {
+    max-width: 650px;
+    margin: 0 auto 20px;
+    color: var(--muted);
+    line-height: 1.6;
+}
+
+.room-qr {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 250px;
+    min-height: 250px;
+    margin: 20px auto;
+
+    padding: 10px;
+
+    border: 8px solid white;
+    border-radius: 15px;
+
+    background: white;
+}
+
+.room-qr img {
+    display: block;
+    width: 230px;
+    height: 230px;
+}
+
+.room-code-share {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    width: min(360px, 100%);
+    margin: 20px auto 14px;
+    padding: 15px;
+
+    border: 1px solid rgba(85, 214, 255, 0.35);
+    border-radius: 16px;
+
+    background: rgba(8, 18, 32, 0.58);
+}
+
+.room-code-share span {
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.room-code-share strong {
+    color: var(--cyan-light);
+    font-size: clamp(30px, 8vw, 46px);
+    letter-spacing: 5px;
+}
+
+.room-public-link {
+    display: inline-block;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+
+    color: var(--cyan-light);
+    font-weight: 800;
+    text-decoration: underline;
+}
+
+#qr-message {
+    max-width: 700px;
+    margin: 12px auto;
+    font-size: 14px;
+}
+/* ============================================================
+   VENTANA MODAL PARA COMPARTIR SALA
+============================================================ */
+
+.share-room-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 20000;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+
+    background:
+        radial-gradient(
+            circle at center,
+            rgba(85, 214, 255, 0.18),
+            rgba(3, 9, 18, 0.96) 72%
+        );
+
+    backdrop-filter: blur(12px);
+}
+
+.share-room-modal {
+    position: relative;
+
+    width: min(560px, 96vw);
+    max-height: 94vh;
+    overflow-y: auto;
+
+    padding: 30px 24px 26px;
+
+    border: 1px solid rgba(183, 239, 255, 0.55);
+    border-radius: 26px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(29, 49, 76, 0.99),
+            rgba(10, 24, 42, 0.99)
+        );
+
+    box-shadow:
+        0 0 35px rgba(85, 214, 255, 0.28),
+        0 25px 90px rgba(0, 0, 0, 0.75);
+
+    text-align: center;
+
+    animation: share-room-modal-in 0.3s ease-out;
+}
+
+@keyframes share-room-modal-in {
+    from {
+        opacity: 0;
+        transform: translateY(25px) scale(0.92);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.share-room-close {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+
+    display: grid;
+
+    width: 40px;
+    height: 40px;
+    min-height: 40px;
+
+    place-items: center;
+
+    padding: 0;
+
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--white);
+
+    font-size: 30px;
+    line-height: 1;
+}
+
+.share-room-close:hover {
+    background: rgba(255, 92, 112, 0.28);
+    color: white;
+}
+
+.share-room-title {
+    justify-content: center;
+    margin-top: 8px;
+}
+
+.share-room-description {
+    max-width: 450px;
+    margin: 0 auto 20px;
+
+    color: var(--muted);
+    line-height: 1.6;
+}
+
+.room-qr {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 250px;
+    min-height: 250px;
+
+    margin: 20px auto;
+
+    padding: 10px;
+
+    border: 8px solid white;
+    border-radius: 15px;
+
+    background: white;
+}
+
+.room-qr img {
+    display: block;
+
+    width: 230px;
+    height: 230px;
+}
+
+.room-code-share {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+
+    width: min(380px, 100%);
+
+    margin: 20px auto 14px;
+    padding: 16px;
+
+    border: 1px solid rgba(85, 214, 255, 0.35);
+    border-radius: 16px;
+
+    background: rgba(8, 18, 32, 0.7);
+}
+
+.room-code-share span {
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.room-code-share strong {
+    color: var(--cyan-light);
+
+    font-size: clamp(32px, 9vw, 48px);
+    font-weight: 1000;
+    letter-spacing: 6px;
+}
+
+.room-public-link {
+    display: inline-block;
+
+    max-width: 100%;
+    overflow-wrap: anywhere;
+
+    margin-top: 4px;
+
+    color: var(--cyan-light);
+    font-weight: 800;
+    text-decoration: underline;
+}
+
+.room-public-link:hover {
+    color: white;
+}
+
+#qr-message {
+    max-width: 450px;
+    margin: 12px auto;
+
+    font-size: 14px;
+}
+
+.share-room-continue {
+    width: min(300px, 100%);
+    margin: 22px auto 0;
+
+    background:
+        linear-gradient(
+            135deg,
+            #4dd6ed,
+            #1ea9d2
+        );
+}
+
+@media (max-width: 700px) {
+    .share-room-overlay {
+        align-items: flex-start;
+        overflow-y: auto;
+        padding: 12px;
+    }
+
+    .share-room-modal {
+        width: 100%;
+        margin: auto 0;
+        padding: 25px 16px 20px;
+        border-radius: 20px;
+    }
+
+    .room-qr {
+        width: 220px;
+        min-height: 220px;
+    }
+
+    .room-qr img {
+        width: 200px;
+        height: 200px;
+    }
+
+    .room-code-share strong {
+        letter-spacing: 3px;
+    }
 }

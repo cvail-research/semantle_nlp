@@ -42,7 +42,29 @@ TEMPLATES_DIR = BASE_DIR / "templates"
 STATIC_DIR.mkdir(exist_ok=True)
 TEMPLATES_DIR.mkdir(exist_ok=True)
 
+# Archivo escrito por compartir.py con el enlace actual de Cloudflare.
+ARCHIVO_URL_TUNEL = BASE_DIR / "tunel_url.txt"
 
+
+def obtener_url_publica() -> str:
+    """
+    Obtiene el enlace público actual.
+
+    compartir.py escribe aquí el dominio temporal de Cloudflare.
+    Si no existe, se devuelve una cadena vacía y el navegador usará
+    la dirección desde la que se abrió el panel.
+    """
+    try:
+        url = ARCHIVO_URL_TUNEL.read_text(
+            encoding="utf-8"
+        ).strip()
+    except FileNotFoundError:
+        return ""
+
+    if url.startswith("https://") or url.startswith("http://"):
+        return url.rstrip("/")
+
+    return ""
 app = FastAPI(
     title="Semantle Español Multijugador"
 )
@@ -753,6 +775,7 @@ class Partida:
         respuesta = {
             "activa": True,
             "codigo": self.codigo,
+            "url_publica": obtener_url_publica(),
             "modo": self.modo,
             "estado": self.estado,
             "numero_ronda": self.numero_ronda,
@@ -1195,6 +1218,7 @@ def estado_partida_admin(
         return {
             "activa": False,
             "codigo": "",
+            "url_publica": obtener_url_publica(),
             "modo": "sala",
             "estado": "SIN_PARTIDA",
             "numero_ronda": 0,
